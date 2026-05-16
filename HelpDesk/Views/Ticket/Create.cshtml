@@ -1,0 +1,141 @@
+﻿@model HelpDesk.ViewModels.CreateTicketViewModel
+@{
+    ViewData["Title"] = "Nouveau ticket";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- En-tête -->
+            <div class="d-flex align-items-center mb-4">
+                <a asp-controller="Ticket" asp-action="Index"
+                   class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+                <div>
+                    <h2 class="mb-0 fw-bold">Nouveau ticket</h2>
+                    <small class="text-muted">
+                        Décrivez votre problème, l'IA analysera automatiquement votre demande
+                    </small>
+                </div>
+            </div>
+
+            <!-- Alerte info IA -->
+            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                <i class="bi bi-robot fs-5 me-2"></i>
+                <div>
+                    <strong>Analyse IA automatique</strong> — À la soumission, notre IA
+                    (Groq/Llama) analysera votre ticket et suggérera une catégorie,
+                    une priorité et une première solution.
+                </div>
+            </div>
+
+            <!-- Formulaire -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-detailed me-2"></i>
+                        Détails du ticket
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post"
+                          enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger d-none" role="alert"></div>
+
+                        <!-- Titre -->
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-semibold">
+                                Titre <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title"
+                                   class="form-control form-control-lg"
+                                   placeholder="Résumez votre problème en une phrase..." />
+                            <span asp-validation-for="Title"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold">
+                                Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description"
+                                      class="form-control" rows="6"
+                                      placeholder="Décrivez votre problème en détail : quand est-il apparu, quelles actions avez-vous déjà essayées..."></textarea>
+                            <span asp-validation-for="Description"
+                                  class="text-danger small"></span>
+                            <div class="form-text">
+                                Plus votre description est précise, meilleure sera l'analyse IA.
+                            </div>
+                        </div>
+
+                        <!-- Catégorie + Priorité -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label fw-semibold">
+                                    Catégorie
+                                </label>
+                                <select asp-for="Category" class="form-select">
+                                    <option value="">-- L'IA suggérera automatiquement --</option>
+                                    <option value="Matériel">Matériel</option>
+                                    <option value="Logiciel">Logiciel</option>
+                                    <option value="Réseau">Réseau</option>
+                                    <option value="Accès / Droits">Accès / Droits</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Priority" class="form-label fw-semibold">
+                                    Priorité
+                                </label>
+                                <select asp-for="Priority" class="form-select">
+                                    <option value="Faible">🟢 Faible</option>
+                                    <option value="Normale" selected>🔵 Normale</option>
+                                    <option value="Haute">🟠 Haute</option>
+                                    <option value="Urgente">🔴 Urgente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Pièce jointe -->
+                        <div class="mb-4">
+                            <label asp-for="Attachment" class="form-label fw-semibold">
+                                Pièce jointe
+                                <span class="text-muted fw-normal">(optionnel)</span>
+                            </label>
+                            <input asp-for="Attachment"
+                                   type="file" class="form-control"
+                                   accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" />
+                            <div class="form-text">
+                                Formats acceptés : PDF, PNG, JPG, DOC, DOCX (max 10 Mo)
+                            </div>
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex gap-2 justify-content-end pt-2 border-top">
+                            <a asp-controller="Ticket" asp-action="Index"
+                               class="btn btn-outline-secondary px-4">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="bi bi-send me-2"></i>
+                                Soumettre le ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

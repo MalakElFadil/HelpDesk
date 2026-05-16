@@ -1,0 +1,205 @@
+﻿@model HelpDesk.ViewModels.TicketDetailViewModel
+@{
+    ViewData["Title"] = "Ticket #" + Model.Id;
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+
+        <!-- Colonne principale -->
+        <div class="col-lg-8">
+
+            <!-- En-tête -->
+            <div class="d-flex align-items-center mb-4">
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">@Model.Title</h2>
+                    <small class="text-muted">
+                        Ticket #@Model.Id · Créé le
+                        @Model.CreatedAt.ToString("dd/MM/yyyy à HH:mm")
+                        par @Model.CreatedByName
+                    </small>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-file-text me-2 text-primary"></i>
+                        Description
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0" style="white-space: pre-wrap;">@Model.Description</p>
+                </div>
+            </div>
+
+            <!-- Bloc Analyse IA -->
+            @if (!string.IsNullOrEmpty(Model.AIAnalysis))
+            {
+                <div class="card border-0 shadow-sm mb-4"
+                     style="border-left: 4px solid #0d6efd !important;">
+                    <div class="card-header bg-primary bg-opacity-10 border-bottom py-3">
+                        <h6 class="mb-0 fw-semibold text-primary">
+                            <i class="bi bi-robot me-2"></i>
+                            Analyse IA (Groq / Llama)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0" style="white-space: pre-wrap;">@Model.AIAnalysis</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Fil de discussion -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-chat-dots me-2 text-primary"></i>
+                        Discussion
+                        <span class="badge bg-secondary ms-2">
+                            @Model.Comments.Count
+                        </span>
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Comments.Any())
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-chat fs-3"></i>
+                            <p class="mt-2 mb-0">Aucun commentaire pour l'instant.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var comment in Model.Comments)
+                            {
+                                <li class="list-group-item px-4 py-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-semibold">
+                                            @comment.AuthorName
+                                        </span>
+                                        <small class="text-muted">
+                                            @comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                    <p class="mb-0 text-body">@comment.Content</p>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            <!-- Ajouter un commentaire -->
+            @if (Model.Status.ToString() != "Résolu" &&
+                        Model.Status.ToString() != "Fermé")
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-reply me-2 text-primary"></i>
+                            Ajouter un commentaire
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="AddComment" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ticketId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <textarea name="content" class="form-control" rows="4"
+                                      placeholder="Écrivez votre commentaire..."
+                                      required></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-send me-2"></i>Envoyer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <!-- Colonne latérale : infos ticket -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        Informations
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5 text-muted small">Statut</dt>
+                        <dd class="col-7">
+                            @switch (Model.Status.ToString())
+                            {
+                                case "Ouvert":
+                                    <span class="badge bg-danger">Ouvert</span>
+                                    break;
+                                case "EnCours":
+                                    <span class="badge bg-warning text-dark">En cours</span>
+                                    break;
+                                case "Résolu":
+                                    <span class="badge bg-success">Résolu</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">Fermé</span>
+                                    break;
+                            }
+                        </dd>
+
+                        <dt class="col-5 text-muted small">Priorité</dt>
+                        <dd class="col-7">
+                            @switch (Model.Priority.ToString())
+                            {
+                                case "Urgente":
+                                    <span class="badge bg-danger">🔴 Urgente</span>
+                                    break;
+                                case "Haute":
+                                    <span class="badge bg-warning text-dark">🟠 Haute</span>
+                                    break;
+                                case "Normale":
+                                    <span class="badge bg-primary">🔵 Normale</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary">🟢 Faible</span>
+                                    break;
+                            }
+                        </dd>
+
+                        <dt class="col-5 text-muted small">Catégorie</dt>
+                        <dd class="col-7">
+                            <span class="badge bg-light text-dark border">
+                                @(Model.Category ?? "Non classé")
+                            </span>
+                        </dd>
+
+                        <dt class="col-5 text-muted small">Créé par</dt>
+                        <dd class="col-7 small">@Model.CreatedByName</dd>
+
+                        <dt class="col-5 text-muted small">Assigné à</dt>
+                        <dd class="col-7 small">
+                            @(Model.AssignedToName ?? "Non assigné")
+                        </dd>
+
+                        <dt class="col-5 text-muted small">Date</dt>
+                        <dd class="col-7 small">
+                            @Model.CreatedAt.ToString("dd/MM/yyyy")
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
