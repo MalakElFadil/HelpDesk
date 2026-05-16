@@ -1,27 +1,58 @@
+// Ce fichier est l'entrée point de l'application. Il configure les services et le pipeline de traitement des requêtes HTTP.
+
+using HelpDesk.Data;
+using HelpDesk.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Base de données SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration
+        .GetConnectionString("DefaultConnection")));
+
+// 2. ASP.NET Identity : gestion des comptes et des rôles
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Règles du mot de passe simplifiées pour le développement
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+// 3. MVC
 builder.Services.AddControllersWithViews();
+
+// 4. Rediriger vers /Account/Login si non connecté
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
+// Authentication DOIT être avant Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
+// La page d'accueil = page de login
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
