@@ -166,5 +166,74 @@ namespace HelpDesk.Controllers
             TempData["Success"] = "Ticket supprimé.";
             return RedirectToAction("Tickets");
         }
+
+        // GET /Admin/Users — liste des utilisateurs
+        public async Task<IActionResult> Users(string? role)
+        {
+            var allUsers = _userManager.Users.ToList();
+            var userList = new List<UserListViewModel>();
+
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userRole = roles.FirstOrDefault();
+
+                // Filtrer par rôle si demandé
+                if (!string.IsNullOrEmpty(role) && userRole != role)
+                    continue;
+
+                userList.Add(new UserListViewModel
+                {
+                    Id = user.Id,
+                    Nom = user.Nom,
+                    Prenom = user.Prenom,
+                    Email = user.Email ?? "",
+                    EstActif = user.EstActif,
+                    DateCreation = user.DateCreation,
+                    Role = userRole
+                });
+            }
+
+            return View(new UsersPageViewModel { Users = userList, Filter = role });
+        }
+
+        // POST /Admin/CreateUser — créer un compte
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(
+            string prenom, string nom, string email,
+            string role, string password)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                Nom = nom,
+                Prenom = prenom,
+                EstActif = true,
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+                await _userManager.AddToRoleAsync(user, role);
+
+            TempData["Success"] = "Compte créé avec succès.";
+            return RedirectToAction("Users");
+        }
+
+        // POST /Admin/ToggleUser — activer/désactiver un compte
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                user.EstActif = !user.EstActif;
+                await _userManager.UpdateAsync(user);
+            }
+            return RedirectToAction("Users");
+        }
     }
 }

@@ -1,11 +1,13 @@
 ﻿using HelpDesk.Data;
 using HelpDesk.Models;
 using HelpDesk.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HelpDesk.Controllers
 {
+    [Authorize(Roles = "Technicien")]
     public class TechnicianController : Controller
     {
         private readonly ApplicationDbContext _context;
