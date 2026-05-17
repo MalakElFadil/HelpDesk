@@ -11,8 +11,7 @@
             <h2 class="fw-bold mb-0">Mes tickets</h2>
             <small class="text-muted">Suivi de toutes vos demandes de support</small>
         </div>
-        <a asp-controller="Ticket" asp-action="Create"
-           class="btn btn-primary px-4">
+        <a asp-controller="Ticket" asp-action="Create" class="btn btn-primary px-4">
             <i class="bi bi-plus-lg me-2"></i>Nouveau ticket
         </a>
     </div>
@@ -21,30 +20,18 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body py-2">
             <div class="d-flex gap-2 flex-wrap">
-                <a asp-action="Index" class="btn btn-sm btn-primary">
-                    Tous
-                </a>
+                <a asp-action="Index" class="btn btn-sm btn-primary">Tous</a>
                 <a asp-action="Index" asp-route-status="Ouvert"
-                   class="btn btn-sm btn-outline-danger">
-                    🔴 Ouverts
-                </a>
+                   class="btn btn-sm btn-outline-danger">🔴 Ouverts</a>
                 <a asp-action="Index" asp-route-status="EnCours"
-                   class="btn btn-sm btn-outline-warning">
-                    🟠 En cours
-                </a>
-                <a asp-action="Index" asp-route-status="Résolu"
-                   class="btn btn-sm btn-outline-success">
-                    🟢 Résolus
-                </a>
-                <a asp-action="Index" asp-route-status="Fermé"
-                   class="btn btn-sm btn-outline-secondary">
-                    ⚫ Fermés
-                </a>
+                   class="btn btn-sm btn-outline-warning">🟠 En cours</a>
+                <a asp-action="Index" asp-route-status="Resolu"
+                   class="btn btn-sm btn-outline-success">🟢 Résolus</a>
             </div>
         </div>
     </div>
 
-    <!-- Tableau des tickets -->
+    <!-- Tableau -->
     @if (!Model.Any())
     {
         <div class="text-center py-5">
@@ -77,45 +64,42 @@
                         {
                             <tr>
                                 <td class="text-muted small">#@ticket.Id</td>
-                                <td>
-                                    <span class="fw-semibold">@ticket.Title</span>
-                                </td>
+                                <td class="fw-semibold">@ticket.Title</td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
-                                        @(ticket.Category?.ToString() ?? "Non classé")
-                                    </span>
-                                </td>
-                                <td>
-                                    @switch (ticket.Priority.ToString())
+                                        @(ticket.Category.HasValue
+                                                                        ? ticket.Category.Value.ToString()
+                                                                        : "Non classé")
+                            </span>
+                        </td>
+                        <td>
+                            @switch (ticket.Priority)
                                     {
-                                        case "Urgente":
-                                            <span class="badge bg-danger">🔴 Urgente</span>
+                                        case HelpDesk.Models.PrioriteTicket.Haute:
+                                            <span class="badge bg-danger">🔴 Haute</span>
                                             break;
-                                        case "Haute":
-                                            <span class="badge bg-warning text-dark">🟠 Haute</span>
-                                            break;
-                                        case "Normale":
-                                            <span class="badge bg-primary">🔵 Normale</span>
+                                        case HelpDesk.Models.PrioriteTicket.Moyenne:
+                                            <span class="badge bg-warning text-dark">🟠 Moyenne</span>
                                             break;
                                         default:
-                                            <span class="badge bg-secondary">🟢 Faible</span>
+                                            <span class="badge bg-secondary">🟢 Basse</span>
                                             break;
                                     }
                                 </td>
                                 <td>
-                                    @switch (ticket.Status.ToString())
+                                    @switch (ticket.Status)
                                     {
-                                        case "Ouvert":
+                                        case HelpDesk.Models.StatutTicket.Ouvert:
                                             <span class="badge bg-danger">Ouvert</span>
                                             break;
-                                        case "EnCours":
+                                        case HelpDesk.Models.StatutTicket.EnCours:
                                             <span class="badge bg-warning text-dark">En cours</span>
                                             break;
-                                        case "Résolu":
+                                        case HelpDesk.Models.StatutTicket.Resolu:
                                             <span class="badge bg-success">Résolu</span>
                                             break;
                                         default:
-                                            <span class="badge bg-secondary">Fermé</span>
+                                            <span class="badge bg-secondary">@ticket.Status</span>
                                             break;
                                     }
                                 </td>
@@ -126,8 +110,7 @@
                                     @(ticket.AssignedToName ?? "Non assigné")
                                 </td>
                                 <td>
-                                    <a asp-action="Detail"
-                                       asp-route-id="@ticket.Id"
+                                    <a asp-action="Detail" asp-route-id="@ticket.Id"
                                        class="btn btn-sm btn-outline-primary">
                                         Voir
                                     </a>
