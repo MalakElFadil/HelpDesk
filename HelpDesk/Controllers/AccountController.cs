@@ -44,7 +44,18 @@ namespace HelpDesk.Controllers
                 lockoutOnFailure: false);
 
             if (result.Succeeded)
+            {
+                // Vérifier si le compte est actif
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && !user.EstActif)
+                {
+                    await _signInManager.SignOutAsync();
+                    ModelState.AddModelError(string.Empty,
+                        "Ce compte a été désactivé. Contactez l'administrateur.");
+                    return View(model);
+                }
                 return RedirectToDashboard();
+            }
 
             ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
             return View(model);

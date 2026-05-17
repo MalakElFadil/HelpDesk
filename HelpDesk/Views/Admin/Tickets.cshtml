@@ -3,7 +3,7 @@
     ViewData["Title"] = "Tous les tickets";
 }
 
-<div class="container-fluid py-4">
+<div class="container-fluid px-4 py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -15,6 +15,14 @@
     </div>
 
     <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3 d-flex
+                justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold">
+                <i class="bi bi-ticket-detailed me-2 text-primary"></i>
+                Liste complète des tickets
+            </h6>
+            <span class="badge bg-secondary">@Model.Count() ticket(s)</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">

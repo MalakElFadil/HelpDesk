@@ -23,12 +23,19 @@ namespace HelpDesk.Controllers
         }
 
         // GET /Ticket/Index — liste des tickets de l'utilisateur connecté
-        public async Task<IActionResult> Index()
+        // GET /Ticket/Index — liste des tickets avec filtre optionnel
+        public async Task<IActionResult> Index(string? status)
         {
             var userId = _userManager.GetUserId(User)!;
             var tickets = await _ticketService.GetUserTicketsAsync(userId);
 
-            // Convertir chaque ticket en ViewModel pour la vue
+            // Appliquer le filtre par statut si demandé
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (Enum.TryParse<StatutTicket>(status, out var statutEnum))
+                    tickets = tickets.Where(t => t.Statut == statutEnum);
+            }
+
             var viewModels = tickets.Select(t => new TicketListViewModel
             {
                 Id = t.Id,

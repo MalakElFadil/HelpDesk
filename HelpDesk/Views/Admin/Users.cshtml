@@ -18,24 +18,26 @@
     </div>
 
     <!-- Filtres par rôle -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body py-2">
-            <div class="d-flex gap-2 flex-wrap">
-                <a asp-action="Users" class="btn btn-sm btn-primary">Tous</a>
-                <a asp-action="Users" asp-route-role="Utilisateur"
-                   class="btn btn-sm btn-outline-secondary">
-                    👤 Utilisateurs
-                </a>
-                <a asp-action="Users" asp-route-role="Technicien"
-                   class="btn btn-sm btn-outline-info">
-                    🔧 Techniciens
-                </a>
-                <a asp-action="Users" asp-route-role="Administrateur"
-                   class="btn btn-sm btn-outline-danger">
-                    👑 Admins
-                </a>
-            </div>
-        </div>
+    @{
+        var currentRole = Context.Request.Query["role"].ToString();
+    }
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-action="Users"
+           class="btn btn-sm @(string.IsNullOrEmpty(currentRole) ? "btn-primary" : "btn-outline-secondary")">
+            Tous
+        </a>
+        <a asp-action="Users" asp-route-role="Utilisateur"
+           class="btn btn-sm @(currentRole == "Utilisateur" ? "btn-secondary text-white" : "btn-outline-secondary")">
+            👤 Utilisateurs
+        </a>
+        <a asp-action="Users" asp-route-role="Technicien"
+           class="btn btn-sm @(currentRole == "Technicien" ? "btn-info text-dark" : "btn-outline-info")">
+            🔧 Techniciens
+        </a>
+        <a asp-action="Users" asp-route-role="Administrateur"
+           class="btn btn-sm @(currentRole == "Administrateur" ? "btn-danger text-white" : "btn-outline-danger")">
+            👑 Admins
+        </a>
     </div>
 
     <!-- Tableau utilisateurs -->

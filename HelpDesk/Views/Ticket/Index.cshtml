@@ -16,18 +16,26 @@
     </div>
 
     <!-- Filtres -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body py-2">
-            <div class="d-flex gap-2 flex-wrap">
-                <a asp-action="Index" class="btn btn-sm btn-primary">Tous</a>
-                <a asp-action="Index" asp-route-status="Ouvert"
-                   class="btn btn-sm btn-outline-danger">🔴 Ouverts</a>
-                <a asp-action="Index" asp-route-status="EnCours"
-                   class="btn btn-sm btn-outline-warning">🟠 En cours</a>
-                <a asp-action="Index" asp-route-status="Resolu"
-                   class="btn btn-sm btn-outline-success">🟢 Résolus</a>
-            </div>
-        </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @{
+            var currentStatus = Context.Request.Query["status"].ToString();
+        }
+        <a asp-action="Index"
+           class="btn btn-sm @(string.IsNullOrEmpty(currentStatus) ? "btn-primary" : "btn-outline-secondary")">
+            Tous
+        </a>
+        <a asp-action="Index" asp-route-status="Ouvert"
+           class="btn btn-sm @(currentStatus == "Ouvert" ? "btn-danger text-white" : "btn-outline-danger")">
+            🔴 Ouverts
+        </a>
+        <a asp-action="Index" asp-route-status="EnCours"
+           class="btn btn-sm @(currentStatus == "EnCours" ? "btn-warning text-dark" : "btn-outline-warning")">
+            🟠 En cours
+        </a>
+        <a asp-action="Index" asp-route-status="Resolu"
+           class="btn btn-sm @(currentStatus == "Resolu" ? "btn-success text-white" : "btn-outline-success")">
+            🟢 Résolus
+        </a>
     </div>
 
     @if (!Model.Any())

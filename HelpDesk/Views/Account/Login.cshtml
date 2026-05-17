@@ -26,7 +26,7 @@
 
         .login-card {
             display: flex;
-            width: 720px;
+            width: 820px; /* ← était 720px, on l'élargit */
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(31,78,121,0.13);
@@ -36,8 +36,8 @@
         .panel-left {
             background-color: #1F4E79;
             color: white;
-            width: 280px;
-            padding: 40px 28px;
+            width: 240px; /* ← était 280px, on réduit le panneau gauche */
+            padding: 32px 24px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -144,27 +144,24 @@
                 </div>
                 <div>
                     <div class="feature-item">
-                        <div class="feature-icon">🎫</div>
                         <div>
-                            <div class="feature-title">Gestion des tickets</div>
+                            <div class="feature-title">🎫 Gestion des tickets</div>
                             <div class="feature-desc">Créez et suivez vos demandes</div>
                         </div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">🤖</div>
                         <div>
-                            <div class="feature-title">Analyse par IA</div>
+                            <div class="feature-title">🤖 Analyse par IA</div>
                             <div class="feature-desc">Catégorisation automatique</div>
                         </div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">📊</div>
                         <div>
-                            <div class="feature-title">Tableau de bord</div>
+                            <div class="feature-title">📊 Tableau de bord</div>
                             <div class="feature-desc">Statistiques en temps réel</div>
                         </div>
                     </div>
-                </div>
+                </div>  
                 <div></div>
             </div>
 
