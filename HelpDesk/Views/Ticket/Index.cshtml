@@ -67,6 +67,7 @@
                                 <td class="fw-semibold">@ticket.Title</td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
+<<<<<<< HEAD
                                         @(ticket.Category.HasValue
                                                                         ? ticket.Category.Value.ToString()
                                                                         : "Non classé")
@@ -74,6 +75,13 @@
                         </td>
                         <td>
                             @switch (ticket.Priority)
+=======
+                                        @(ticket.Category?.ToString() ?? "Non classé")
+                                    </span>
+                                </td>
+                                <td>
+                                    @switch (ticket.Priority.ToString())
+>>>>>>> b154eb7eabe9c1910f7211e26001e37d8cb25a72
                                     {
                                         case HelpDesk.Models.PrioriteTicket.Haute:
                                             <span class="badge bg-danger">🔴 Haute</span>

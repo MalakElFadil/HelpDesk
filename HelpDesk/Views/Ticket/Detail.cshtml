@@ -182,9 +182,13 @@
                         <dt class="col-5 text-muted small">Catégorie</dt>
                         <dd class="col-7">
                             <span class="badge bg-light text-dark border">
+<<<<<<< HEAD
                                 @(Model.Category.HasValue
                                     ? Model.Category.Value.ToString()
                                     : "Non classé")
+=======
+                                @(Model.Category?.ToString() ?? "Non classé")
+>>>>>>> b154eb7eabe9c1910f7211e26001e37d8cb25a72
                             </span>
                         </dd>
 

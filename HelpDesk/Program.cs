@@ -1,7 +1,10 @@
 // Ce fichier est l'entrée point de l'application. Il configure les services et le pipeline de traitement des requêtes HTTP.
 
 using HelpDesk.Data;
+using HelpDesk.Data.Repositories;
+using HelpDesk.Interfaces;
 using HelpDesk.Models;
+using HelpDesk.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +15,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration
         .GetConnectionString("DefaultConnection")));
 
-// 2. ASP.NET Identity : gestion des comptes et des rôles
+// 2. Enregistrement du repository — injection de dépendances
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+
+// HttpClient pour l'appel API Groq
+builder.Services.AddHttpClient();
+
+// 3. ASP.NET Identity : gestion des comptes et des rôles
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     // Règles du mot de passe simplifiées pour le développement
@@ -24,10 +34,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// 3. MVC
+// 4. MVC
 builder.Services.AddControllersWithViews();
 
-// 4. Rediriger vers /Account/Login si non connecté
+// 5. Rediriger vers /Account/Login si non connecté
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
