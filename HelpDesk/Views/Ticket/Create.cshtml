@@ -21,30 +21,42 @@
                 </div>
             </div>
 
-            <!-- Alerte info IA -->
-            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+            <!-- Info IA -->
+            <div class="alert alert-info d-flex align-items-center mb-4">
                 <i class="bi bi-robot fs-5 me-2"></i>
                 <div>
-                    <strong>Analyse IA automatique</strong> — À la soumission, notre IA
-                    (Groq/Llama) analysera votre ticket et suggérera une catégorie,
-                    une priorité et une première solution.
+                    <strong>Analyse IA automatique</strong> — Notre IA (Groq/Llama)
+                    analysera votre ticket et suggérera une catégorie, une priorité
+                    et une première solution.
                 </div>
             </div>
 
+            <!-- Message de succès -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
             <!-- Formulaire -->
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="mb-0">
-                        <i class="bi bi-ticket-detailed me-2"></i>
-                        Détails du ticket
+                <div class="card-header py-3" style="background-color:#1F4E79;">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-ticket-detailed me-2"></i>Détails du ticket
                     </h5>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" method="post"
-                          enctype="multipart/form-data">
+
+                    @* Erreurs de validation — seulement après soumission *@
+                    @if (!ViewData.ModelState.IsValid &&
+                                        ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger mb-4">
+                            <div asp-validation-summary="ModelOnly"></div>
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly"
-                             class="alert alert-danger d-none" role="alert"></div>
 
                         <!-- Titre -->
                         <div class="mb-4">
@@ -54,8 +66,7 @@
                             <input asp-for="Title"
                                    class="form-control form-control-lg"
                                    placeholder="Résumez votre problème en une phrase..." />
-                            <span asp-validation-for="Title"
-                                  class="text-danger small"></span>
+                            <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
                         <!-- Description -->
@@ -63,11 +74,9 @@
                             <label asp-for="Description" class="form-label fw-semibold">
                                 Description <span class="text-danger">*</span>
                             </label>
-                            <textarea asp-for="Description"
-                                      class="form-control" rows="6"
-                                      placeholder="Décrivez votre problème en détail : quand est-il apparu, quelles actions avez-vous déjà essayées..."></textarea>
-                            <span asp-validation-for="Description"
-                                  class="text-danger small"></span>
+                            <textarea asp-for="Description" class="form-control" rows="6"
+                                      placeholder="Décrivez votre problème en détail..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
                             <div class="form-text">
                                 Plus votre description est précise, meilleure sera l'analyse IA.
                             </div>
@@ -80,11 +89,11 @@
                                     Catégorie
                                 </label>
                                 <select asp-for="Category" class="form-select">
-                                    <option value="">-- L'IA suggérera automatiquement --</option>
-                                    <option value="Matériel">Matériel</option>
+                                    <option value="Autre">-- L'IA suggérera --</option>
+                                    <option value="Materiel">Matériel</option>
                                     <option value="Logiciel">Logiciel</option>
-                                    <option value="Réseau">Réseau</option>
-                                    <option value="Accès / Droits">Accès / Droits</option>
+                                    <option value="Reseau">Réseau</option>
+                                    <option value="AccesCompte">Accès / Droits</option>
                                     <option value="Autre">Autre</option>
                                 </select>
                             </div>
@@ -93,25 +102,10 @@
                                     Priorité
                                 </label>
                                 <select asp-for="Priority" class="form-select">
-                                    <option value="Faible">🟢 Faible</option>
-                                    <option value="Normale" selected>🔵 Normale</option>
-                                    <option value="Haute">🟠 Haute</option>
-                                    <option value="Urgente">🔴 Urgente</option>
+                                    <option value="Basse">🟢 Basse</option>
+                                    <option value="Moyenne" selected>🟠 Moyenne</option>
+                                    <option value="Haute">🔴 Haute</option>
                                 </select>
-                            </div>
-                        </div>
-
-                        <!-- Pièce jointe -->
-                        <div class="mb-4">
-                            <label asp-for="Attachment" class="form-label fw-semibold">
-                                Pièce jointe
-                                <span class="text-muted fw-normal">(optionnel)</span>
-                            </label>
-                            <input asp-for="Attachment"
-                                   type="file" class="form-control"
-                                   accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" />
-                            <div class="form-text">
-                                Formats acceptés : PDF, PNG, JPG, DOC, DOCX (max 10 Mo)
                             </div>
                         </div>
 
@@ -122,8 +116,7 @@
                                 Annuler
                             </a>
                             <button type="submit" class="btn btn-primary px-5">
-                                <i class="bi bi-send me-2"></i>
-                                Soumettre le ticket
+                                <i class="bi bi-send me-2"></i>Soumettre le ticket
                             </button>
                         </div>
                     </form>

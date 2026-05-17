@@ -58,8 +58,10 @@ namespace HelpDesk.ViewModels
     public class CommentViewModel
     {
         public int Id { get; set; }
-        public required string Content { get; set; }
-        public required string AuthorName { get; set; }
+        public string Content { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public string AuthorRole { get; set; } = string.Empty; 
+        public bool IsCurrentUser { get; set; } = false;       
         public DateTime CreatedAt { get; set; }
     }
 

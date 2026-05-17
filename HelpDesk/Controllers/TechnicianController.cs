@@ -60,19 +60,24 @@ namespace HelpDesk.Controllers
         }
 
         // GET: /Technician/Detail/5
+        // GET: /Technician/Detail/5
         public IActionResult Detail(int id)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var ticket = _context.Tickets
                 .Include(t => t.Createur)
                 .Include(t => t.Technicien)
                 .Include(t => t.Comments)
-                    .ThenInclude(c => c.Auteur)
+                    .ThenInclude(c => c.Auteur)  // ← charge l'auteur de chaque commentaire
                 .FirstOrDefault(t => t.Id == id);
 
-            // Vérifier que le ticket est bien assigné à ce technicien
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (ticket == null)
+                return NotFound();
+
+            // Sécurité : seul le technicien assigné peut voir ce ticket
             if (ticket.TechnicienId != userId)
-                return Forbid(); // accès refusé
+                return Forbid();
 
             var comments = ticket.Comments
                 .OrderBy(c => c.DateCreation)
@@ -80,16 +85,23 @@ namespace HelpDesk.Controllers
                 {
                     Id = c.Id,
                     Content = c.Contenu,
-                    AuthorName = c.Auteur != null
-                                 ? $"{c.Auteur.Prenom} {c.Auteur.Nom}"
-                                 : "Inconnu",
+                    IsCurrentUser = c.AuteurId == userId,
+                    // "Moi" si c'est le technicien connecté, sinon nom + prénom
+                    AuthorName = c.AuteurId == userId
+                                    ? "Moi"
+                                    : (c.Auteur != null
+                                       ? $"{c.Auteur.Prenom} {c.Auteur.Nom}"
+                                       : "Inconnu"),
+                    // Rôle simple selon si c'est le créateur ou le technicien
+                    AuthorRole = c.AuteurId == ticket.CreateurId
+                                    ? "Utilisateur"
+                                    : "Technicien",
                     CreatedAt = c.DateCreation
                 })
                 .ToList();
 
             string? analyseIA = null;
-            if (!string.IsNullOrEmpty(ticket.AnalyseIA_Categorie) ||
-                !string.IsNullOrEmpty(ticket.AnalyseIA_Suggestion))
+            if (!string.IsNullOrEmpty(ticket.AnalyseIA_Suggestion))
             {
                 analyseIA = $"Catégorie suggérée : {ticket.AnalyseIA_Categorie}\n" +
                             $"Priorité suggérée  : {ticket.AnalyseIA_Priorite}\n" +
@@ -106,11 +118,9 @@ namespace HelpDesk.Controllers
                 Priority = ticket.Priorite,
                 CreatedAt = ticket.DateCreation,
                 CreatedByName = ticket.Createur != null
-                                 ? $"{ticket.Createur.Prenom} {ticket.Createur.Nom}"
-                                 : "Inconnu",
+                                 ? $"{ticket.Createur.Prenom} {ticket.Createur.Nom}" : "Inconnu",
                 AssignedToName = ticket.Technicien != null
-                                 ? $"{ticket.Technicien.Prenom} {ticket.Technicien.Nom}"
-                                 : null,
+                                 ? $"{ticket.Technicien.Prenom} {ticket.Technicien.Nom}" : null,
                 AIAnalysis = analyseIA,
                 Comments = comments
             };
@@ -144,11 +154,14 @@ namespace HelpDesk.Controllers
             if (string.IsNullOrWhiteSpace(content))
                 return RedirectToAction("Detail", new { id = ticketId });
 
+            // Récupérer l'id du technicien connecté
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var comment = new Comment
             {
                 TicketId = ticketId,
                 Contenu = content,
-                AuteurId = null,
+                AuteurId = userId,   // ← l'auteur est le technicien connecté
                 DateCreation = DateTime.Now
             };
 

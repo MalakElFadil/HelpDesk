@@ -12,8 +12,10 @@ namespace HelpDesk.Services
         public AIService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            // Lire la clé depuis User Secrets
             _apiKey = configuration["GroqApiKey"] ?? string.Empty;
+
+            // Vérification au démarrage
+            Console.WriteLine($"[AI] Clé Groq chargée : {(_apiKey.Length > 5 ? "OUI (" + _apiKey.Substring(0, 5) + "...)" : "NON — clé vide")}");
         }
 
         public async Task<AIAnalysisResult?> AnalyserTicketAsync(
@@ -44,12 +46,12 @@ namespace HelpDesk.Services
                 // Construction du corps de la requête Groq
                 var requestBody = new
                 {
-                    model = "llama3-70b-8192",
+                    model = "llama-3.3-70b-versatile",
                     messages = new[]
                     {
                         new { role = "user", content = prompt }
                     },
-                    max_tokens = 200,
+                    max_tokens = 300,
                     temperature = 0.3
                 };
 
@@ -64,11 +66,16 @@ namespace HelpDesk.Services
 
                 // Appel à l'API Groq
                 var response = await _httpClient.PostAsync(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    content);
+                    "https://api.groq.com/openai/v1/chat/completions", content);
 
+                // Log du résultat
+                Console.WriteLine($"[AI] Status: {(int)response.StatusCode}");
                 if (!response.IsSuccessStatusCode)
+                {
+                    var errBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[AI] Erreur Groq: {errBody}");
                     return null;
+                }
 
                 // Lecture de la réponse
                 var responseJson = await response.Content.ReadAsStringAsync();
@@ -95,9 +102,10 @@ namespace HelpDesk.Services
 
                 return result;
             }
-            catch
+            catch (Exception ex)
             {
-                // En cas d'erreur → mode dégradé
+                // Afficher l'erreur exacte dans la console Visual Studio
+                Console.WriteLine($"[AI ERROR] {ex.GetType().Name}: {ex.Message}");
                 return null;
             }
         }

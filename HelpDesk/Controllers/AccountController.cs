@@ -38,13 +38,12 @@ namespace HelpDesk.Controllers
                 return View(model);
 
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email,
-                model.Password,
-                isPersistent: false,
-                lockoutOnFailure: false);
+                model.Email, model.Password,
+                isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
+                // Vérifier si le compte est actif avant d'autoriser l'accès
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null && !user.EstActif)
                 {

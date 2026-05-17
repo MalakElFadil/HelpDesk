@@ -23,17 +23,17 @@ namespace HelpDesk.Controllers
         }
 
         // GET /Ticket/Index — liste des tickets de l'utilisateur connecté
-        // GET /Ticket/Index — liste des tickets avec filtre optionnel
+        // GET /Ticket/Index — liste des tickets avec filtre optionnel par statut
         public async Task<IActionResult> Index(string? status)
         {
             var userId = _userManager.GetUserId(User)!;
             var tickets = await _ticketService.GetUserTicketsAsync(userId);
 
-            // Appliquer le filtre par statut si demandé
-            if (!string.IsNullOrEmpty(status))
+            // Appliquer le filtre si un statut est sélectionné
+            if (!string.IsNullOrEmpty(status) &&
+                Enum.TryParse<StatutTicket>(status, out var statutEnum))
             {
-                if (Enum.TryParse<StatutTicket>(status, out var statutEnum))
-                    tickets = tickets.Where(t => t.Statut == statutEnum);
+                tickets = tickets.Where(t => t.Statut == statutEnum);
             }
 
             var viewModels = tickets.Select(t => new TicketListViewModel
@@ -45,11 +45,9 @@ namespace HelpDesk.Controllers
                 Status = t.Statut,
                 CreatedAt = t.DateCreation,
                 CreatedByName = t.Createur != null
-                                 ? $"{t.Createur.Prenom} {t.Createur.Nom}"
-                                 : "Inconnu",
+                                 ? $"{t.Createur.Prenom} {t.Createur.Nom}" : "Inconnu",
                 AssignedToName = t.Technicien != null
-                                 ? $"{t.Technicien.Prenom} {t.Technicien.Nom}"
-                                 : null
+                                 ? $"{t.Technicien.Prenom} {t.Technicien.Nom}" : null
             });
 
             return View(viewModels);
@@ -71,12 +69,30 @@ namespace HelpDesk.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTicketViewModel model)
         {
+            // Debug temporaire — afficher les erreurs dans la console
+            foreach (var key in ModelState.Keys)
+            {
+                var state = ModelState[key];
+                foreach (var error in state!.Errors)
+                {
+                    Console.WriteLine($"[VALIDATION ERROR] {key}: {error.ErrorMessage}");
+                }
+            }
+
+            // Afficher les erreurs de validation dans la vue
             if (!ModelState.IsValid)
+            {
+                // Passer les erreurs à la vue pour les voir
+                foreach (var error in ModelState.Values
+                                                .SelectMany(v => v.Errors))
+                {
+                    ModelState.AddModelError(string.Empty, error.ErrorMessage);
+                }
                 return View(model);
+            }
 
             var userId = _userManager.GetUserId(User)!;
 
-            // Créer l'entité Ticket depuis le ViewModel
             var ticket = new Ticket
             {
                 Titre = model.Title,
@@ -85,7 +101,6 @@ namespace HelpDesk.Controllers
                 Categorie = model.Category,
             };
 
-            // Créer le ticket + analyse IA automatique
             var created = await _ticketService.CreateTicketAsync(ticket, userId);
 
             TempData["Success"] = "Ticket créé avec succès !";
@@ -93,13 +108,49 @@ namespace HelpDesk.Controllers
         }
 
         // GET /Ticket/Detail/5 — détail d'un ticket
+        // GET /Ticket/Detail/5 — détail d'un ticket
         public async Task<IActionResult> Detail(int id)
         {
             var ticket = await _ticketService.GetTicketByIdAsync(id);
             if (ticket == null)
                 return NotFound();
 
-            // Construire le ViewModel avec toutes les infos du ticket
+            // Id de l'utilisateur connecté — pour afficher "Moi"
+            var currentUserId = _userManager.GetUserId(User);
+
+            // ── Construire les commentaires avec rôle ──────────────────────
+            var comments = new List<CommentViewModel>();
+            foreach (var c in ticket.Comments.OrderBy(c => c.DateCreation))
+            {
+                // Récupérer le rôle de l'auteur via UserManager
+                string role = "";
+                if (c.Auteur != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(c.Auteur);
+                    role = roles.FirstOrDefault() switch
+                    {
+                        "Administrateur" => "Admin",
+                        "Technicien" => "Technicien",
+                        _ => "Utilisateur"
+                    };
+                }
+
+                comments.Add(new CommentViewModel
+                {
+                    Id = c.Id,
+                    Content = c.Contenu,
+                    IsCurrentUser = c.AuteurId == currentUserId,
+                    AuthorName = c.AuteurId == currentUserId
+                                    ? "Moi"
+                                    : (c.Auteur != null
+                                       ? $"{c.Auteur.Prenom} {c.Auteur.Nom}"
+                                       : "Inconnu"),
+                    AuthorRole = role,
+                    CreatedAt = c.DateCreation
+                });
+            }
+            // ──────────────────────────────────────────────────────────────
+
             var vm = new TicketDetailViewModel
             {
                 Id = ticket.Id,
@@ -115,17 +166,8 @@ namespace HelpDesk.Controllers
                 AssignedToName = ticket.Technicien != null
                                  ? $"{ticket.Technicien.Prenom} {ticket.Technicien.Nom}"
                                  : null,
-                // Afficher la suggestion IA si disponible
                 AIAnalysis = ticket.AnalyseIA_Suggestion,
-                Comments = ticket.Comments.Select(c => new CommentViewModel
-                {
-                    Id = c.Id,
-                    Content = c.Contenu,
-                    AuthorName = c.Auteur != null
-                                 ? $"{c.Auteur.Prenom} {c.Auteur.Nom}"
-                                 : "Inconnu",
-                    CreatedAt = c.DateCreation
-                }).ToList()
+                Comments = comments   // ← les commentaires avec rôle
             };
 
             return View(vm);

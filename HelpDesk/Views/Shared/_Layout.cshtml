@@ -78,19 +78,18 @@
                 background: rgba(255,255,255,0.25);
             }
 
-        /* Contenu pleine largeur */
         .main-content {
             width: 100%;
             padding: 0;
         }
 
-        /* Sticky sidebar sous la navbar */
+        /* Sidebar sticky — doit rester sous la navbar fixe */
         .sticky-top {
             top: 72px !important;
             z-index: 100 !important;
         }
 
-        /* Couleurs Bootstrap override */
+        /* Couleurs primaires — override Bootstrap */
         .btn-primary {
             background-color: #1F4E79 !important;
             border-color: #1F4E79 !important;
@@ -98,6 +97,7 @@
 
             .btn-primary:hover {
                 background-color: #163a5e !important;
+                border-color: #163a5e !important;
             }
 
         .btn-outline-primary {
@@ -109,6 +109,10 @@
                 background-color: #1F4E79 !important;
                 color: white !important;
             }
+
+        .text-primary {
+            color: #1F4E79 !important;
+        }
     </style>
 </head>
 <body>
@@ -118,8 +122,10 @@
         <nav class="navbar-helpdesk">
             <a href="@homeUrl" class="navbar-brand-custom">Help<span>Desk</span></a>
             <div class="navbar-right">
-                <span class="nav-user">👤 @UserManager.GetUserName(User)</span>
-                <form asp-controller="Account" asp-action="Logout" method="post">
+                <span class="nav-user">
+                    <i class="bi bi-person-circle me-1"></i>@UserManager.GetUserName(User)
+                </span>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn-logout">
                         <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
@@ -133,6 +139,7 @@
         @RenderBody()
     </div>
 
+    <!-- jQuery AVANT Bootstrap et les scripts de validation -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
