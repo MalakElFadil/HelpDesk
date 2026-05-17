@@ -1,0 +1,88 @@
+﻿@model IEnumerable<HelpDesk.ViewModels.TicketListViewModel>
+@{
+    ViewData["Title"] = "Tous les tickets";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Tous les tickets</h2>
+            <small class="text-muted">
+                @Model.Count() ticket(s) au total
+            </small>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Créé par</th>
+                        <th>Assigné à</th>
+                        <th>Statut</th>
+                        <th>Priorité</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model)
+                    {
+                        <tr>
+                            <td class="text-muted small">#@ticket.Id</td>
+                            <td class="fw-semibold">@ticket.Title</td>
+                            <td class="small">@ticket.CreatedByName</td>
+                            <td class="small text-muted">
+                                @(ticket.AssignedToName ?? "Non assigné")
+                            </td>
+                            <td>
+                                @switch (ticket.Status)
+                                {
+                                    case HelpDesk.Models.StatutTicket.Ouvert:
+                                        <span class="badge bg-danger">Ouvert</span>
+                                        break;
+                                    case HelpDesk.Models.StatutTicket.EnCours:
+                                        <span class="badge bg-warning text-dark">En cours</span>
+                                        break;
+                                    case HelpDesk.Models.StatutTicket.Resolu:
+                                        <span class="badge bg-success">Résolu</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                {
+                                    <span class="badge bg-danger">Haute</span>
+                                }
+                                else if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                {
+                                    <span class="badge bg-warning text-dark">Moyenne</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Basse</span>
+                                }
+                            </td>
+                            <td class="text-muted small">
+                                @ticket.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                <a asp-controller="Admin"
+                                   asp-action="Detail"
+                                   asp-route-id="@ticket.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Voir
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
