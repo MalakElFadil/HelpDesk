@@ -3,129 +3,402 @@
     ViewData["Title"] = "Nouveau ticket";
 }
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-            <!-- En-tête -->
-            <div class="d-flex align-items-center mb-4">
-                <a asp-controller="Ticket" asp-action="Index"
-                   class="btn btn-outline-secondary btn-sm me-3">
-                    <i class="bi bi-arrow-left"></i> Retour
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-section">NAVIGATION</div>
+        <a asp-controller="Ticket" asp-action="Index" class="sidebar-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a asp-controller="Ticket" asp-action="Create"
+           class="sidebar-link active">
+            <i class="bi bi-plus-circle"></i> Nouveau ticket
+        </a>
+        <a asp-controller="Ticket" asp-action="Index" class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Mes tickets
+        </a>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">KB</div>
+                <div>
+                    <div class="user-name">Utilisateur</div>
+                    <div class="user-email">user@@helpdesk.ma</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="main-area">
+        <div class="top-bar">
+            <div class="breadcrumb-bar">
+                <a asp-action="Index" class="text-muted small text-decoration-none">
+                    Dashboard
                 </a>
-                <div>
-                    <h2 class="mb-0 fw-bold">Nouveau ticket</h2>
-                    <small class="text-muted">
-                        Décrivez votre problème, l'IA analysera automatiquement votre demande
-                    </small>
-                </div>
+                <span class="text-muted small mx-2">·</span>
+                <span class="small fw-semibold">Nouveau ticket</span>
             </div>
+        </div>
 
-            <!-- Info IA -->
-            <div class="alert alert-info d-flex align-items-center mb-4">
-                <i class="bi bi-robot fs-5 me-2"></i>
-                <div>
-                    <strong>Analyse IA automatique</strong> — Notre IA (Groq/Llama)
-                    analysera votre ticket et suggérera une catégorie, une priorité
-                    et une première solution.
-                </div>
-            </div>
+        <div class="content-area">
+            <div class="row g-4">
 
-            <!-- Message de succès -->
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success">@TempData["Success"]</div>
-            }
+                <!-- Formulaire principal -->
+                <div class="col-lg-8">
+                    <div class="form-card">
+                        <h5 class="fw-bold mb-1">Nouveau ticket de support</h5>
+                        <p class="text-muted small mb-4">
+                            Décrivez clairement votre problème
+                        </p>
 
-            <!-- Formulaire -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header py-3" style="background-color:#1F4E79;">
-                    <h5 class="mb-0 text-white">
-                        <i class="bi bi-ticket-detailed me-2"></i>Détails du ticket
-                    </h5>
-                </div>
-                <div class="card-body p-4">
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success">@TempData["Success"]</div>
+                        }
 
-                    @* Erreurs de validation — seulement après soumission *@
-                    @if (!ViewData.ModelState.IsValid &&
-                                        ViewData.ModelState.ErrorCount > 0)
-                    {
-                        <div class="alert alert-danger mb-4">
-                            <div asp-validation-summary="ModelOnly"></div>
-                        </div>
-                    }
+                        <form asp-action="Create" method="post">
+                            @Html.AntiForgeryToken()
 
-                    <form asp-action="Create" method="post">
-                        @Html.AntiForgeryToken()
+                            @if (!ViewData.ModelState.IsValid &&
+                                                        ViewData.ModelState.ErrorCount > 0)
+                            {
+                                <div class="alert alert-danger mb-4">
+                                    <div asp-validation-summary="ModelOnly"></div>
+                                </div>
+                            }
 
-                        <!-- Titre -->
-                        <div class="mb-4">
-                            <label asp-for="Title" class="form-label fw-semibold">
-                                Titre <span class="text-danger">*</span>
-                            </label>
-                            <input asp-for="Title"
-                                   class="form-control form-control-lg"
-                                   placeholder="Résumez votre problème en une phrase..." />
-                            <span asp-validation-for="Title" class="text-danger small"></span>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-4">
-                            <label asp-for="Description" class="form-label fw-semibold">
-                                Description <span class="text-danger">*</span>
-                            </label>
-                            <textarea asp-for="Description" class="form-control" rows="6"
-                                      placeholder="Décrivez votre problème en détail..."></textarea>
-                            <span asp-validation-for="Description" class="text-danger small"></span>
-                            <div class="form-text">
-                                Plus votre description est précise, meilleure sera l'analyse IA.
-                            </div>
-                        </div>
-
-                        <!-- Catégorie + Priorité -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label asp-for="Category" class="form-label fw-semibold">
-                                    Catégorie
+                            <!-- Titre -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">
+                                    Titre du problème
+                                    <span class="text-danger">*</span>
                                 </label>
-                                <select asp-for="Category" class="form-select">
-                                    <option value="Autre">-- L'IA suggérera --</option>
-                                    <option value="Materiel">Matériel</option>
-                                    <option value="Logiciel">Logiciel</option>
-                                    <option value="Reseau">Réseau</option>
-                                    <option value="AccesCompte">Accès / Droits</option>
-                                    <option value="Autre">Autre</option>
-                                </select>
+                                <input asp-for="Title" class="form-control"
+                                       placeholder="VPN ne fonctionne plus" />
+                                <span asp-validation-for="Title"
+                                      class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="Priority" class="form-label fw-semibold">
-                                    Priorité
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">
+                                    Description détaillée
+                                    <span class="text-danger">*</span>
                                 </label>
-                                <select asp-for="Priority" class="form-select">
-                                    <option value="Basse">🟢 Basse</option>
-                                    <option value="Moyenne" selected>🟠 Moyenne</option>
-                                    <option value="Haute">🔴 Haute</option>
-                                </select>
+                                <textarea asp-for="Description" class="form-control"
+                                          rows="6"
+                                          placeholder="Depuis ce matin, je n'arrive plus à me connecter..."></textarea>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span asp-validation-for="Description"
+                                          class="text-danger small"></span>
+                                    <span class="text-muted" style="font-size:0.75rem;">
+                                        Máx. 1500 caractères
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Catégorie + Priorité -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">
+                                        Catégorie
+                                    </label>
+                                    <select asp-for="Category" class="form-select">
+                                        <option value="Reseau">Réseau</option>
+                                        <option value="Materiel">Matériel</option>
+                                        <option value="Logiciel">Logiciel</option>
+                                        <option value="AccesCompte">Accès/Compte</option>
+                                        <option value="Autre">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">
+                                        Priorité estimée
+                                    </label>
+                                    <select asp-for="Priority" class="form-select">
+                                        <option value="Basse">Basse</option>
+                                        <option value="Moyenne" selected>Moyenne</option>
+                                        <option value="Haute">Haute</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Pièce jointe -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">
+                                    Pièce jointe (optionnel)
+                                </label>
+                                <div class="upload-zone">
+                                    <i class="bi bi-paperclip fs-4 text-muted"></i>
+                                    <div class="text-muted small mt-2">
+                                        Cliquez ou glissez-déposez
+                                    </div>
+                                    <div class="text-muted" style="font-size:0.72rem;">
+                                        PDF, PNG, JPG — max 5 Mo
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bloc IA -->
+                            <div class="ia-notice mb-4">
+                                <i class="bi bi-robot me-2"></i>
+                                <strong>L'IA analysera automatiquement votre ticket</strong><br>
+                                <span class="small">
+                                    À la soumission, notre IA déterminera la catégorie,
+                                    priorité et proposera une suggestion au technicien.
+                                </span>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a asp-action="Index"
+                                   class="btn btn-outline-secondary px-4">
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn-submit">
+                                    Soumettre le ticket →
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Colonne droite : conseils -->
+                <div class="col-lg-4">
+                    <div class="tips-card mb-3">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="bi bi-lightbulb text-warning me-2"></i>Conseils
+                        </h6>
+                        <div class="tip-item">
+                            <div class="tip-num">1</div>
+                            <div class="small">
+                                Soyez précis dans le titre — aide le technicien immédiatement.
                             </div>
                         </div>
-
-                        <!-- Boutons -->
-                        <div class="d-flex gap-2 justify-content-end pt-2 border-top">
-                            <a asp-controller="Ticket" asp-action="Index"
-                               class="btn btn-outline-secondary px-4">
-                                Annuler
-                            </a>
-                            <button type="submit" class="btn btn-primary px-5">
-                                <i class="bi bi-send me-2"></i>Soumettre le ticket
-                            </button>
+                        <div class="tip-item">
+                            <div class="tip-num">2</div>
+                            <div class="small">
+                                Ajoutez une capture d'écran si possible.
+                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div class="tip-item">
+                            <div class="tip-num">3</div>
+                            <div class="small">
+                                Mentionnez depuis quand le problème existe.
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="tips-card">
+                        <h6 class="fw-semibold mb-3">CYCLE DE VIE</h6>
+                        <div class="cycle-item">
+                            <span class="badge-status status-ouvert">Ouvert</span>
+                            <span class="small text-muted ms-2">→ Ticket reçu</span>
+                        </div>
+                        <div class="cycle-item">
+                            <span class="badge-status status-encours">En cours</span>
+                            <span class="small text-muted ms-2">→ Traitement</span>
+                        </div>
+                        <div class="cycle-item">
+                            <span class="badge-status status-resolu">Résolu</span>
+                            <span class="small text-muted ms-2">→ Problème réglé</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .sidebar {
+        width: 200px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+    }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+    }
+
+    .content-area {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 10px;
+        padding: 28px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .tips-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .upload-zone {
+        border: 1.5px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        background: #fafafa;
+        cursor: pointer;
+    }
+
+    .ia-notice {
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-size: 0.88rem;
+        color: #1e40af;
+    }
+
+    .btn-submit {
+        background: #1F4E79;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background: #163a5e;
+        }
+
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .tip-num {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #1F4E79;
+        color: white;
+        font-size: 0.72rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .cycle-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .badge-status {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 500;
+    }
+
+    .status-encours {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-ouvert {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .status-resolu {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+</style>
 
 @section Scripts {
     @{

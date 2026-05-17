@@ -3,146 +3,335 @@
     ViewData["Title"] = "Dashboard Technicien";
 }
 
-<div class="container py-4">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-    <!-- En-tête -->
-    <div class="mb-4">
-        <h2 class="fw-bold mb-0">Dashboard Technicien</h2>
-        <small class="text-muted">Vue d'ensemble de vos tickets assignés</small>
-    </div>
-
-    <!-- KPIs -->
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                        <i class="bi bi-ticket-detailed fs-4 text-primary"></i>
-                    </div>
-                    <div>
-                        <div class="fs-2 fw-bold">@Model.TotalAssigned</div>
-                        <div class="text-muted small">Total assignés</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-warning bg-opacity-10 p-3">
-                        <i class="bi bi-hourglass-split fs-4 text-warning"></i>
-                    </div>
-                    <div>
-                        <div class="fs-2 fw-bold">@Model.EnCours</div>
-                        <div class="text-muted small">En cours</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                        <i class="bi bi-check-circle fs-4 text-success"></i>
-                    </div>
-                    <div>
-                        <div class="fs-2 fw-bold">@Model.Resolus</div>
-                        <div class="text-muted small">Résolus</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                        <i class="bi bi-exclamation-triangle fs-4 text-danger"></i>
-                    </div>
-                    <div>
-                        <div class="fs-2 fw-bold">@Model.Urgents</div>
-                        <div class="text-muted small">Urgents</div>
-                    </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-section">NAVIGATION</div>
+        <a asp-controller="Technician" asp-action="Dashboard"
+           class="sidebar-link active">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a asp-controller="Technician" asp-action="Assigned"
+           class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Tickets assignés
+            <span class="badge bg-danger ms-auto">@Model.TotalAssigned</span>
+        </a>
+        <a asp-controller="Technician" asp-action="Resolved"
+           class="sidebar-link">
+            <i class="bi bi-check-circle"></i> Résolus
+        </a>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">TK</div>
+                <div>
+                    <div class="user-name">Technicien</div>
+                    <div class="user-email">tech@@helpdesk.ma</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Liste tickets récents -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3">
-            <h6 class="mb-0 fw-semibold">
-                <i class="bi bi-list-ul me-2 text-primary"></i>
-                Tickets à traiter
-            </h6>
+    <!-- Contenu -->
+    <div class="main-area">
+        <div class="top-bar">
+            <span class="page-title">Dashboard Technicien</span>
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Rechercher un ticket..." />
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Priorité</th>
-                        <th>Statut</th>
-                        <th>Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ticket in Model.TicketsRecents)
-                    {
-                        <tr>
-                            <td class="text-muted small">#@ticket.Id</td>
-                            <td class="fw-semibold">@ticket.Title</td>
-                            <td>
-                                <span class="badge bg-light text-dark border">
-                                    @ticket.Category.ToString()
-                            </span>
-                        </td>
-                        <td>
-                            @switch (ticket.Priority)
-                                {
-                                    case HelpDesk.Models.PrioriteTicket.Haute:
-                                        <span class="badge bg-danger">🔴 Haute</span>
-                                        break;
-                                    case HelpDesk.Models.PrioriteTicket.Moyenne:
-                                        <span class="badge bg-warning text-dark">🟠 Moyenne</span>
-                                        break;
-                                    default:
-                                        <span class="badge bg-secondary">🟢 Basse</span>
-                                        break;
-                                }
-                            </td>
-                            <td>
-                                @switch (ticket.Status)
-                                {
-                                    case HelpDesk.Models.StatutTicket.Ouvert:
-                                        <span class="badge bg-danger">Ouvert</span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.EnCours:
-                                        <span class="badge bg-warning text-dark">En cours</span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.Resolu:
-                                        <span class="badge bg-success">Résolu</span>
-                                        break;
-                                    default:
-                                        <span class="badge bg-secondary">@ticket.Status</span>
-                                        break;
-                                }
-                            </td>
-                            <td class="text-muted small">
-                                @ticket.CreatedAt.ToString("dd/MM/yyyy")
-                            </td>
-                            <td>
-                                <a asp-action="Detail" asp-route-id="@ticket.Id"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Traiter
+
+        <div class="content-area">
+
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Assignés (total)</div>
+                    <div class="kpi-value">@Model.TotalAssigned</div>
+                    <div class="kpi-sub text-muted small">En cours</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">En cours</div>
+                    <div class="kpi-value text-warning">@Model.EnCours</div>
+                    <div class="kpi-sub text-muted small">À traiter</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Résolus ce mois</div>
+                    <div class="kpi-value text-success">@Model.Resolus</div>
+                    <div class="kpi-sub text-muted small">↑ +4 vs mois dernier</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Urgents</div>
+                    <div class="kpi-value text-danger">@Model.Urgents</div>
+                    <div class="kpi-sub text-danger small fw-semibold">Priorité haute</div>
+                </div>
+            </div>
+
+            <!-- Tickets à traiter -->
+            <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                <h6 class="fw-semibold mb-0">Tickets à traiter</h6>
+                <a asp-controller="Technician" asp-action="Assigned"
+                   class="btn btn-sm btn-outline-primary">
+                    Voir tous →
+                </a>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var t in Model.TicketsRecents)
+                {
+                    <div class="ticket-card @(t.Priority == HelpDesk.Models.PrioriteTicket.Haute ? "ticket-urgent" : "")">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-fill">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="text-muted small">#@t.Id</span>
+                                    <span class="fw-semibold">@t.Title</span>
+                                    @if (t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                                    {
+                                        <span class="badge-status status-encours">En cours</span>
+                                    }
+                                    else if (t.Status == HelpDesk.Models.StatutTicket.Ouvert)
+                                    {
+                                        <span class="badge-status status-ouvert">Ouvert</span>
+                                    }
+                                    @if (t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                    {
+                                        <span class="badge-priority priority-haute">Haute</span>
+                                    }
+                                    else if (t.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                    {
+                                        <span class="badge-priority priority-moyenne">Moyenne</span>
+                                    }
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="bi bi-tag me-1"></i>@t.Category.ToString()
+                                    <span class="mx-2">·</span>
+                                    <i class="bi bi-person me-1"></i>@t.CreatedByName
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted small">
+                                    @t.CreatedAt.ToString("dd Avr")
+                                </span>
+                                <a asp-controller="Technician" asp-action="Detail"
+                                   asp-route-id="@t.Id"
+                                   class="btn-traiter">
+                                    Traiter →
                                 </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
         </div>
     </div>
 </div>
+
+<style>
+    .sidebar {
+        width: 200px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+    }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f4f6fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 0.85rem;
+            width: 180px;
+        }
+
+    .content-area {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 16px;
+    }
+
+    .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .kpi-label {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .kpi-sub {
+        margin-top: 2px;
+        font-size: 0.78rem;
+    }
+
+    .ticket-card {
+        background: white;
+        border-radius: 10px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        border-left: 3px solid transparent;
+    }
+
+    .ticket-urgent {
+        border-left-color: #ef4444;
+    }
+
+    .badge-status {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 500;
+    }
+
+    .status-encours {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-ouvert {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .badge-priority {
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+
+    .priority-haute {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .priority-moyenne {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .btn-traiter {
+        background: none;
+        border: 1px solid #1F4E79;
+        color: #1F4E79;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 0.82rem;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+        .btn-traiter:hover {
+            background: #1F4E79;
+            color: white;
+        }
+</style>

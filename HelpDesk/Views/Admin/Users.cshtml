@@ -5,16 +5,30 @@
 
 <div class="container py-4">
 
-    <!-- En-tête -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Gestion des utilisateurs</h2>
-            <small class="text-muted">Comptes, rôles et accès</small>
+    <!-- Mini-stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small">Total comptes</div>
+                <div class="fs-3 fw-bold">@Model.Users.Count</div>
+            </div>
         </div>
-        <button type="button" class="btn btn-primary px-4"
-                data-bs-toggle="modal" data-bs-target="#modalAjout">
-            <i class="bi bi-person-plus me-2"></i>Ajouter un compte
-        </button>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small">Comptes actifs</div>
+                <div class="fs-3 fw-bold text-success">
+                    @Model.Users.Count(u => u.EstActif)
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="text-muted small">Techniciens</div>
+                <div class="fs-3 fw-bold text-info">
+                    @Model.Users.Count(u => u.Role == "Technicien")
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Filtres par rôle -->

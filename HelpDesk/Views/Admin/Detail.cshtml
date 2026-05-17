@@ -40,9 +40,9 @@
                             <span class="badge bg-danger">Haute priorité</span>
                         }
                         <span class="badge bg-light text-dark border">
-                            @(Model.Category.HasValue
-                                                        ? Model.Category.Value.ToString()
-                                                        : "Non classé")
+                            @(Model.Category.HasValue? Model.Category.Value.ToString() : "Non classé")
+                            @* par *@
+                            @Model.Category.ToString()
                         </span>
                         <span class="text-muted small">
                             👤 @Model.CreatedByName —

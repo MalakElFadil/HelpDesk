@@ -3,94 +3,338 @@
     ViewData["Title"] = "Tous les tickets";
 }
 
-<div class="container-fluid px-4 py-4">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Tous les tickets</h2>
-            <small class="text-muted">
-                @Model.Count() ticket(s) au total
-            </small>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-section">PRINCIPAL</div>
+        <a asp-controller="Admin" asp-action="Dashboard" class="sidebar-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a asp-controller="Admin" asp-action="Tickets"
+           class="sidebar-link active">
+            <i class="bi bi-ticket-detailed"></i> Tous les tickets
+            <span class="badge bg-danger ms-auto">@Model.Count()</span>
+        </a>
+        <div class="sidebar-section">GESTION</div>
+        <a asp-controller="Admin" asp-action="Users" class="sidebar-link">
+            <i class="bi bi-people"></i> Utilisateurs
+        </a>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+                <div>
+                    <div class="user-name">Admin</div>
+                    <div class="user-email">admin@@helpdesk.ma</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3 d-flex
-                justify-content-between align-items-center">
-            <h6 class="mb-0 fw-semibold">
-                <i class="bi bi-ticket-detailed me-2 text-primary"></i>
-                Liste complète des tickets
-            </h6>
-            <span class="badge bg-secondary">@Model.Count() ticket(s)</span>
+    <!-- Contenu -->
+    <div class="main-area">
+        <div class="top-bar">
+            <span class="page-title">Tous les tickets</span>
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Rechercher un ticket..."
+                       id="searchInput" onkeyup="filterTable()" />
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Titre</th>
-                        <th>Créé par</th>
-                        <th>Assigné à</th>
-                        <th>Statut</th>
-                        <th>Priorité</th>
-                        <th>Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ticket in Model)
-                    {
-                        <tr>
-                            <td class="text-muted small">#@ticket.Id</td>
-                            <td class="fw-semibold">@ticket.Title</td>
-                            <td class="small">@ticket.CreatedByName</td>
-                            <td class="small text-muted">
-                                @(ticket.AssignedToName ?? "Non assigné")
-                            </td>
-                            <td>
-                                @switch (ticket.Status)
-                                {
-                                    case HelpDesk.Models.StatutTicket.Ouvert:
-                                        <span class="badge bg-danger">Ouvert</span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.EnCours:
-                                        <span class="badge bg-warning text-dark">En cours</span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.Resolu:
-                                        <span class="badge bg-success">Résolu</span>
-                                        break;
-                                }
-                            </td>
-                            <td>
-                                @if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Haute)
-                                {
-                                    <span class="badge bg-danger">Haute</span>
-                                }
-                                else if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
-                                {
-                                    <span class="badge bg-warning text-dark">Moyenne</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Basse</span>
-                                }
-                            </td>
-                            <td class="text-muted small">
-                                @ticket.CreatedAt.ToString("dd/MM/yyyy")
-                            </td>
-                            <td>
-                                <a asp-controller="Admin"
-                                   asp-action="Detail"
-                                   asp-route-id="@ticket.Id"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Voir
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+        <div class="content-area">
+
+            <!-- Filtres -->
+            <div class="d-flex gap-2 mb-4">
+                <button class="filter-btn active" onclick="filterStatus('all', this)">
+                    Tous <span class="badge bg-secondary ms-1">@Model.Count()</span>
+                </button>
+                <button class="filter-btn" onclick="filterStatus('EnCours', this)">
+                    En cours
+                    <span class="badge bg-warning text-dark ms-1">
+                        @Model.Count(t => t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                    </span>
+                </button>
+                <button class="filter-btn" onclick="filterStatus('Ouvert', this)">
+                    Ouverts
+                    <span class="badge bg-danger ms-1">
+                        @Model.Count(t => t.Status == HelpDesk.Models.StatutTicket.Ouvert)
+                    </span>
+                </button>
+                <button class="filter-btn" onclick="filterStatus('Haute', this)">
+                    Haute priorité
+                    <span class="badge bg-danger ms-1">
+                        @Model.Count(t => t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                    </span>
+                </button>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="ticketTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="small">#</th>
+                                <th class="small">Titre</th>
+                                <th class="small">Utilisateur</th>
+                                <th class="small">Assigné à</th>
+                                <th class="small">Statut</th>
+                                <th class="small">Priorité</th>
+                                <th class="small">Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model)
+                            {
+                                <tr data-status="@t.Status" data-priority="@t.Priority">
+                                    <td class="text-muted small">#@t.Id</td>
+                                    <td>
+                                        <div class="fw-semibold small">@t.Title</div>
+                                        <div class="text-muted" style="font-size:0.75rem;">
+                                            @t.Category.ToString()
+                                        </div>
+                                    </td>
+                                    <td class="small">@t.CreatedByName</td>
+                                    <td class="small text-muted">
+                                        @(t.AssignedToName ?? "Non assigné")
+                                    </td>
+                                    <td>
+                                        @if (t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                                        {
+                                            <span class="badge-status status-encours">En cours</span>
+                                        }
+                                        else if (t.Status == HelpDesk.Models.StatutTicket.Ouvert)
+                                        {
+                                            <span class="badge-status status-ouvert">Ouvert</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-status status-resolu">Résolu</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                        {
+                                            <span class="badge-priority priority-haute">Haute</span>
+                                        }
+                                        else if (t.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                        {
+                                            <span class="badge-priority priority-moyenne">Moyenne</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-priority priority-basse">Basse</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted small">
+                                        @t.CreatedAt.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Admin" asp-action="Detail"
+                                           asp-route-id="@t.Id"
+                                           class="btn btn-sm btn-outline-primary">Voir</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
+
+<style>
+    /* Reprendre le même CSS sidebar que Dashboard */
+    .sidebar {
+        width: 220px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+    }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f4f6fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 0.85rem;
+            width: 200px;
+        }
+
+    .content-area {
+        padding: 24px;
+    }
+
+    .filter-btn {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        cursor: pointer;
+    }
+
+        .filter-btn.active {
+            background: #1F4E79;
+            color: white;
+            border-color: #1F4E79;
+        }
+
+    .badge-status {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-encours {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-ouvert {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .status-resolu {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .badge-priority {
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+    }
+
+    .priority-haute {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .priority-moyenne {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .priority-basse {
+        background: #F3F4F6;
+        color: #6B7280;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function filterStatus(status, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('#ticketTable tbody tr').forEach(row => {
+                if (status === 'all') { row.style.display = ''; return; }
+                const s = row.dataset.status;
+                const p = row.dataset.priority;
+                row.style.display = (s === status || p === status) ? '' : 'none';
+            });
+        }
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#ticketTable tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

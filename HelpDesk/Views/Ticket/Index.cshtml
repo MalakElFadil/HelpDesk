@@ -1,128 +1,345 @@
 ﻿@model IEnumerable<HelpDesk.ViewModels.TicketListViewModel>
+
 @{
     ViewData["Title"] = "Mes tickets";
+    var currentStatus = Context.Request.Query["status"].ToString();
+
+    var allClass = string.IsNullOrEmpty(currentStatus) ? "active" : "";
+    var ouvertClass = currentStatus == "Ouvert" ? "active" : "";
+    var enCoursClass = currentStatus == "EnCours" ? "active" : "";
+    var resoluClass = currentStatus == "Resolu" ? "active" : "";
 }
 
-<div class="container py-4">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Mes tickets</h2>
-            <small class="text-muted">Suivi de toutes vos demandes de support</small>
-        </div>
-        <a asp-controller="Ticket" asp-action="Create" class="btn btn-primary px-4">
-            <i class="bi bi-plus-lg me-2"></i>Nouveau ticket
-        </a>
-    </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-section">NAVIGATION</div>
 
-    <!-- Filtres -->
-    <div class="d-flex gap-2 flex-wrap">
-        @{
-            var currentStatus = Context.Request.Query["status"].ToString();
-        }
-        <a asp-action="Index"
-           class="btn btn-sm @(string.IsNullOrEmpty(currentStatus) ? "btn-primary" : "btn-outline-secondary")">
-            Tous
+        <a asp-controller="Ticket" asp-action="Index" class="sidebar-link active">
+            <i class="bi bi-speedometer2"></i> Dashboard
         </a>
-        <a asp-action="Index" asp-route-status="Ouvert"
-           class="btn btn-sm @(currentStatus == "Ouvert" ? "btn-danger text-white" : "btn-outline-danger")">
-            🔴 Ouverts
-        </a>
-        <a asp-action="Index" asp-route-status="EnCours"
-           class="btn btn-sm @(currentStatus == "EnCours" ? "btn-warning text-dark" : "btn-outline-warning")">
-            🟠 En cours
-        </a>
-        <a asp-action="Index" asp-route-status="Resolu"
-           class="btn btn-sm @(currentStatus == "Resolu" ? "btn-success text-white" : "btn-outline-success")">
-            🟢 Résolus
-        </a>
-    </div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-inbox fs-1 text-muted"></i>
-            <p class="text-muted mt-3">Aucun ticket trouvé.</p>
-            <a asp-action="Create" class="btn btn-primary mt-2">
-                Créer votre premier ticket
-            </a>
-        </div>
-    }
-    else
-    {
-        <div class="card border-0 shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Titre</th>
-                            <th>Catégorie</th>
-                            <th>Priorité</th>
-                            <th>Statut</th>
-                            <th>Date</th>
-                            <th>Assigné à</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var t in Model)
-                        {
-                            <tr>
-                                <td class="text-muted small">#@t.Id</td>
-                                <td class="fw-semibold">@t.Title</td>
-                                <td>
-                                    <span class="badge bg-light text-dark border">
-                                        @t.Category.ToString()
-                                    </span>
-                                </td>
-                                <td>
-                                    @if (t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
-                                    {
-                                        <span class="badge bg-danger">🔴 Haute</span>
-                                    }
-                                    else if (t.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
-                                    {
-                                        <span class="badge bg-warning text-dark">🟠 Moyenne</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">🟢 Basse</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (t.Status == HelpDesk.Models.StatutTicket.Ouvert)
-                                    {
-                                        <span class="badge bg-danger">Ouvert</span>
-                                    }
-                                    else if (t.Status == HelpDesk.Models.StatutTicket.EnCours)
-                                    {
-                                        <span class="badge bg-warning text-dark">En cours</span>
-                                    }
-                                    else if (t.Status == HelpDesk.Models.StatutTicket.Resolu)
-                                    {
-                                        <span class="badge bg-success">Résolu</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">@t.Status</span>
-                                    }
-                                </td>
-                                <td class="text-muted small">
-                                    @t.CreatedAt.ToString("dd/MM/yyyy")
-                                </td>
-                                <td class="text-muted small">
-                                    @(t.AssignedToName ?? "Non assigné")
-                                </td>
-                                <td>
-                                    <a asp-action="Detail" asp-route-id="@t.Id"
-                                       class="btn btn-sm btn-outline-primary">Voir</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        <a asp-controller="Ticket" asp-action="Create" class="sidebar-link">
+            <i class="bi bi-plus-circle"></i> Nouveau ticket
+        </a>
+
+        <a asp-controller="Ticket" asp-action="Index" class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Mes tickets
+            <span class="badge bg-danger ms-auto">@Model.Count()</span>
+        </a>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">KB</div>
+                <div>
+                    <div class="user-name">Utilisateur</div>
+                    <div class="user-email">user@@helpdesk.ma</div>
+                </div>
             </div>
         </div>
-    }
+    </div>
+
+    <!-- Main -->
+    <div class="main-area">
+        <div class="top-bar">
+            <span class="page-title">Mes tickets</span>
+
+            <div class="d-flex gap-2">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text"
+                           placeholder="Rechercher..."
+                           id="searchInput"
+                           onkeyup="filterTable()" />
+                </div>
+
+                <a asp-controller="Ticket"
+                   asp-action="Create"
+                   class="btn-create">
+                    + Nouveau
+                </a>
+            </div>
+        </div>
+
+        <div class="content-area">
+
+            <!-- Filtres -->
+            <div class="d-flex gap-2 mb-4">
+                <a asp-action="Index" class="filter-btn @allClass">
+                    Tous
+                    <span class="badge bg-secondary ms-1">@Model.Count()</span>
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-status="Ouvert"
+                   class="filter-btn @ouvertClass">
+                    Ouverts
+                    <span class="badge bg-danger ms-1">
+                        @Model.Count(t => t.Status == HelpDesk.Models.StatutTicket.Ouvert)
+                    </span>
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-status="EnCours"
+                   class="filter-btn @enCoursClass">
+                    En cours
+                    <span class="badge bg-warning text-dark ms-1">
+                        @Model.Count(t => t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                    </span>
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-status="Resolu"
+                   class="filter-btn @resoluClass">
+                    Résolus
+                    <span class="badge bg-success ms-1">
+                        @Model.Count(t => t.Status == HelpDesk.Models.StatutTicket.Resolu)
+                    </span>
+                </a>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">Aucun ticket trouvé.</p>
+
+                    <a asp-action="Create" class="btn btn-primary mt-2">
+                        Créer votre premier ticket
+                    </a>
+                </div>
+            }
+            else
+            {
+                @{
+                    var actifs = Model.Where(t =>
+                        t.Status != HelpDesk.Models.StatutTicket.Resolu).ToList();
+
+                    var resolus = Model.Where(t =>
+                        t.Status == HelpDesk.Models.StatutTicket.Resolu).ToList();
+                }
+
+                @if (actifs.Any())
+                {
+                    <div class="section-label">EN ATTENTE DE RÉSOLUTION</div>
+
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        @foreach (var t in actifs)
+                        {
+                            var cardClass = t.Priority == HelpDesk.Models.PrioriteTicket.Haute
+                                ? "ticket-urgent"
+                                : "";
+
+                            <div class="ticket-card @cardClass">
+                                <div class="d-flex justify-content-between align-items-start">
+
+                                    <div class="flex-fill">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="text-muted small">#@t.Id</span>
+                                            <span class="fw-semibold">@t.Title</span>
+
+                                            @if (t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                                            {
+                                                <span class="badge-status status-encours">En cours</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge-status status-ouvert">Ouvert</span>
+                                            }
+
+                                            @if (t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                            {
+                                                <span class="badge-priority priority-haute">Haute</span>
+                                            }
+                                            else if (t.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                            {
+                                                <span class="badge-priority priority-moyenne">Moyenne</span>
+                                            }
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            <i class="bi bi-tag me-1"></i>@t.Category.ToString()
+                                            <span class="mx-2">·</span>
+                                            <i class="bi bi-person me-1"></i>
+
+                                            @(t.AssignedToName != null
+                                                ? $"Technicien {t.AssignedToName}"
+                                                : "Non assigné")
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="text-muted small">
+                                            @t.CreatedAt.ToString("dd/MM/yyyy")
+                                        </span>
+
+                                        <a asp-action="Detail"
+                                           asp-route-id="@t.Id"
+                                           class="btn-voir">
+                                            Voir →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (resolus.Any())
+                {
+                    <div class="section-label">RÉSOLUS</div>
+
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var t in resolus)
+                        {
+                            <div class="ticket-card ticket-resolu">
+                                <div class="d-flex justify-content-between align-items-start">
+
+                                    <div class="flex-fill">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="text-muted small">#@t.Id</span>
+                                            <span class="fw-semibold text-muted">@t.Title</span>
+                                            <span class="badge-status status-resolu">Résolu</span>
+
+                                            <span class="badge bg-light text-muted border small">
+                                                Basse
+                                            </span>
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            <i class="bi bi-tag me-1"></i>@t.Category.ToString()
+                                            <span class="mx-2">·</span>
+                                            ✓ Résolu en 1j
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="text-muted small">
+                                            @t.CreatedAt.ToString("dd/MM/yyyy")
+                                        </span>
+
+                                        <a asp-action="Detail"
+                                           asp-route-id="@t.Id"
+                                           class="btn-voir">
+                                            Voir →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>
+
+<style>
+    .sidebar {
+        width: 200px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: rgba(255,255,255,0.12);
+        color: white;
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .content-area {
+        padding: 24px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .ticket-card {
+        background: white;
+        border-radius: 10px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        border-left: 3px solid transparent;
+    }
+
+    .ticket-urgent {
+        border-left-color: #ef4444;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+
+            document.querySelectorAll('.ticket-card').forEach(card => {
+                card.style.display =
+                    card.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}
