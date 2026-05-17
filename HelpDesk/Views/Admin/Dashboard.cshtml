@@ -1,0 +1,144 @@
+﻿@model HelpDesk.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard Admin";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Dashboard</h2>
+            <small class="text-muted">Vue globale du système HelpDesk</small>
+        </div>
+        <a asp-controller="Admin" asp-action="Tickets"
+           class="btn btn-primary px-4">
+            Voir tous les tickets
+        </a>
+    </div>
+
+    <!-- KPIs — 4 cartes comme la maquette Fig.2 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Total tickets</div>
+                    <div class="fw-bold fs-3">@Model.TotalTickets</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">En cours</div>
+                    <div class="fw-bold fs-3 text-warning">
+                        @Model.TicketsEnCours
+                    </div>
+                    <small class="text-muted">À traiter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Taux résolution</div>
+                    <div class="fw-bold fs-3 text-success">
+                        @(Model.TotalTickets > 0
+                                                ? $"{(Model.TicketsResolus * 100 / Model.TotalTickets)}%"
+                                                : "0%")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Urgents</div>
+                    <div class="fw-bold fs-3 text-danger">
+                        @Model.TicketsUrgents
+                    </div>
+                    <small class="text-danger">Priorité haute</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tickets récents -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3 d-flex
+                    justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold">Tickets récents</h6>
+            <a asp-controller="Admin" asp-action="Tickets"
+               class="text-primary small text-decoration-none">
+                Voir tous →
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Utilisateur</th>
+                        <th>Statut</th>
+                        <th>Priorité</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model.TicketsRecents)
+                    {
+                        <tr>
+                            <td class="text-muted small">#@ticket.Id</td>
+                            <td class="fw-semibold">@ticket.Title</td>
+                            <td class="small">@ticket.CreatedByName</td>
+                            <td>
+                                @switch (ticket.Status)
+                                {
+                                    case HelpDesk.Models.StatutTicket.Ouvert:
+                                        <span class="badge bg-danger">Ouvert</span>
+                                        break;
+                                    case HelpDesk.Models.StatutTicket.EnCours:
+                                        <span class="badge bg-warning text-dark">
+                                            En cours
+                                        </span>
+                                        break;
+                                    case HelpDesk.Models.StatutTicket.Resolu:
+                                        <span class="badge bg-success">Résolu</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                {
+                                    <span class="badge bg-danger">Haute</span>
+                                }
+                                else if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                {
+                                    <span class="badge bg-warning text-dark">Moyenne</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Basse</span>
+                                }
+                            </td>
+                            <td class="text-muted small">
+                                @ticket.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                <a asp-controller="Admin"
+                                   asp-action="Detail"
+                                   asp-route-id="@ticket.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Voir
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

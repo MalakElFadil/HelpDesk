@@ -1,0 +1,257 @@
+﻿@model HelpDesk.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Connexion";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HelpDesk — Connexion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+    <style>
+        body {
+            background-color: #F4F6FA;
+            margin: 0;
+        }
+
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            display: flex;
+            width: 720px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(31,78,121,0.13);
+        }
+
+        /* Panneau gauche bleu — comme la maquette Fig.1 */
+        .panel-left {
+            background-color: #1F4E79;
+            color: white;
+            width: 280px;
+            padding: 40px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+            .logo span {
+                color: #90CAF9;
+            }
+
+        .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon {
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            font-size: 0.78rem;
+            opacity: 0.7;
+        }
+
+        /* Panneau droit blanc */
+        .panel-right {
+            background: white;
+            flex: 1;
+            padding: 40px 36px;
+        }
+
+        .role-btn {
+            border: 1.5px solid #E5E7EB;
+            background: white;
+            color: #555;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .role-btn.active {
+                background: #1F4E79;
+                color: white;
+                border-color: #1F4E79;
+            }
+
+        .btn-login {
+            background-color: #1F4E79;
+            border: none;
+            color: white;
+            width: 100%;
+            padding: 11px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+            .btn-login:hover {
+                background-color: #163a5e;
+            }
+
+        .form-control {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <!-- Panneau gauche -->
+            <div class="panel-left">
+                <div>
+                    <div class="logo">Help<span>Desk</span></div>
+                    <div class="subtitle">Système de gestion des tickets</div>
+                </div>
+                <div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎫</div>
+                        <div>
+                            <div class="feature-title">Gestion des tickets</div>
+                            <div class="feature-desc">Créez et suivez vos demandes</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🤖</div>
+                        <div>
+                            <div class="feature-title">Analyse par IA</div>
+                            <div class="feature-desc">Catégorisation automatique</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div>
+                            <div class="feature-title">Tableau de bord</div>
+                            <div class="feature-desc">Statistiques en temps réel</div>
+                        </div>
+                    </div>
+                </div>
+                <div></div>
+            </div>
+
+            <!-- Panneau droit -->
+            <div class="panel-right">
+                <h4 class="fw-bold mb-1">Bienvenue 👋</h4>
+                <p class="text-muted small mb-4">
+                    Connectez-vous à votre espace HelpDesk
+                </p>
+
+                <!-- Sélection du rôle (visuel uniquement) -->
+                <div class="mb-4">
+                    <label class="form-label small text-muted">
+                        Connexion en tant que
+                    </label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="role-btn active">
+                            👤 Utilisateur
+                        </button>
+                        <button type="button" class="role-btn">
+                            🔧 Technicien
+                        </button>
+                        <button type="button" class="role-btn">
+                            ⚙️ Admin
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Formulaire de connexion -->
+                <form asp-action="Login" asp-controller="Account" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger small py-2 mb-3">
+                            <div asp-validation-summary="ModelOnly"></div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">
+                            Adresse email
+                        </label>
+                        <input asp-for="Email"
+                               class="form-control"
+                               placeholder="votre@email.ma" />
+                        <span asp-validation-for="Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-medium">
+                            Mot de passe
+                        </label>
+                        <input asp-for="Password"
+                               class="form-control"
+                               placeholder="••••••••" />
+                        <span asp-validation-for="Password"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        Se connecter
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none small"
+                           style="color:#1F4E79;">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Boutons de rôle — visuels uniquement, le vrai rôle est géré par Identity
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.role-btn')
+                        .forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HelpDesk.ViewModels
 {
-    // ── Création d'un ticket ──────────────────────────────────────────────
     public class CreateTicketViewModel
     {
         [Required(ErrorMessage = "Le titre est obligatoire")]
@@ -19,7 +18,7 @@ namespace HelpDesk.ViewModels
         public required string Description { get; set; }
 
         [Display(Name = "Catégorie")]
-        public CategorieTicket? Category { get; set; }
+        public CategorieTicket Category { get; set; } = CategorieTicket.Autre;
 
         [Display(Name = "Priorité")]
         public PrioriteTicket Priority { get; set; } = PrioriteTicket.Moyenne;
@@ -28,12 +27,11 @@ namespace HelpDesk.ViewModels
         public IFormFile? Attachment { get; set; }
     }
 
-    // ── Liste des tickets ─────────────────────────────────────────────────
     public class TicketListViewModel
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-        public CategorieTicket? Category { get; set; }
+        public CategorieTicket Category { get; set; }
         public StatutTicket Status { get; set; }
         public PrioriteTicket Priority { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -41,13 +39,12 @@ namespace HelpDesk.ViewModels
         public string? AssignedToName { get; set; }
     }
 
-    // ── Détail d'un ticket ────────────────────────────────────────────────
     public class TicketDetailViewModel
     {
         public int Id { get; set; }
         public required string Title { get; set; }
         public required string Description { get; set; }
-        public CategorieTicket? Category { get; set; }
+        public CategorieTicket Category { get; set; }
         public StatutTicket Status { get; set; }
         public PrioriteTicket Priority { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -58,12 +55,20 @@ namespace HelpDesk.ViewModels
         public string? NewComment { get; set; }
     }
 
-    // ── Commentaire ───────────────────────────────────────────────────────
     public class CommentViewModel
     {
         public int Id { get; set; }
         public required string Content { get; set; }
         public required string AuthorName { get; set; }
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class TechnicianDashboardViewModel
+    {
+        public int TotalAssigned { get; set; }
+        public int EnCours { get; set; }
+        public int Resolus { get; set; }
+        public int Urgents { get; set; }
+        public List<TicketListViewModel> TicketsRecents { get; set; } = new();
     }
 }

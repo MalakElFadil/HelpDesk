@@ -6,11 +6,14 @@
 <div class="container py-4">
     <div class="row g-4">
 
+        <!-- Colonne principale -->
         <div class="col-lg-8">
 
+            <!-- En-tête -->
             <div class="d-flex align-items-center mb-4">
-                <a asp-action="Index" class="btn btn-outline-secondary btn-sm me-3">
-                    <i class="bi bi-arrow-left"></i> Retour
+                <a asp-action="Dashboard"
+                   class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-arrow-left"></i> Dashboard
                 </a>
                 <div>
                     <h2 class="fw-bold mb-0">@Model.Title</h2>
@@ -26,7 +29,8 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-semibold">
-                        <i class="bi bi-file-text me-2 text-primary"></i>Description
+                        <i class="bi bi-file-text me-2 text-primary"></i>
+                        Description du problème
                     </h6>
                 </div>
                 <div class="card-body">
@@ -34,14 +38,15 @@
                 </div>
             </div>
 
-            <!-- Bloc IA -->
+            <!-- Bloc Analyse IA -->
             @if (!string.IsNullOrEmpty(Model.AIAnalysis))
             {
                 <div class="card border-0 shadow-sm mb-4"
                      style="border-left:4px solid #0d6efd !important;">
                     <div class="card-header bg-primary bg-opacity-10 border-bottom py-3">
                         <h6 class="mb-0 fw-semibold text-primary">
-                            <i class="bi bi-robot me-2"></i>Analyse IA (Groq / Llama)
+                            <i class="bi bi-robot me-2"></i>
+                            Analyse IA (Groq / Llama 3.3)
                         </h6>
                     </div>
                     <div class="card-body">
@@ -50,7 +55,7 @@
                 </div>
             }
 
-            <!-- Discussion -->
+            <!-- Fil de discussion -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-semibold">
@@ -64,22 +69,22 @@
                     {
                         <div class="text-center py-4 text-muted">
                             <i class="bi bi-chat fs-3"></i>
-                            <p class="mt-2 mb-0">Aucun commentaire pour l'instant.</p>
+                            <p class="mt-2 mb-0">Aucun échange pour l'instant.</p>
                         </div>
                     }
                     else
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var c in Model.Comments)
+                            @foreach (var comment in Model.Comments)
                             {
                                 <li class="list-group-item px-4 py-3">
                                     <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-semibold">@c.AuthorName</span>
+                                        <span class="fw-semibold">@comment.AuthorName</span>
                                         <small class="text-muted">
-                                            @c.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            @comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                                         </small>
                                     </div>
-                                    <p class="mb-0">@c.Content</p>
+                                    <p class="mb-0">@comment.Content</p>
                                 </li>
                             }
                         </ul>
@@ -87,46 +92,67 @@
                 </div>
             </div>
 
-            <!-- Ajouter commentaire -->
+            <!-- Zone réponse technicien -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="bi bi-reply me-2 text-primary"></i>
+                        Répondre au client
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Reply" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ticketId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" rows="4"
+                                      placeholder="Votre réponse au client..."
+                                      required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-send me-2"></i>Envoyer la réponse
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bouton Marquer résolu -->
             @if (Model.Status != HelpDesk.Models.StatutTicket.Resolu)
             {
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="mb-0 fw-semibold">
-                            <i class="bi bi-reply me-2 text-primary"></i>
-                            Ajouter un commentaire
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <form asp-action="AddComment" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="ticketId" value="@Model.Id" />
-                            <div class="mb-3">
-                                <textarea name="content" class="form-control" rows="4"
-                                      placeholder="Écrivez votre commentaire..."
-                                      required></textarea>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary px-4">
-                                    <i class="bi bi-send me-2"></i>Envoyer
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                <form asp-action="UpdateStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ticketId" value="@Model.Id" />
+                    <input type="hidden" name="statut" value="Resolu" />
+                    <button type="submit" class="btn btn-success w-100 py-2">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Marquer comme résolu
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-success text-center">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Ce ticket est marqué comme <strong>résolu</strong>.
                 </div>
             }
+
         </div>
 
-        <!-- Sidebar -->
+        <!-- Colonne latérale -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm sticky-top" style="top:1rem;">
                 <div class="card-header bg-white border-bottom py-3">
                     <h6 class="mb-0 fw-semibold">
-                        <i class="bi bi-info-circle me-2 text-primary"></i>Informations
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        Informations
                     </h6>
                 </div>
                 <div class="card-body">
-                    <dl class="row mb-0">
+                    <dl class="row mb-3">
+
                         <dt class="col-5 text-muted small">Statut</dt>
                         <dd class="col-7">
                             @if (Model.Status == HelpDesk.Models.StatutTicket.Ouvert)
@@ -174,7 +200,27 @@
 
                         <dt class="col-5 text-muted small">Date</dt>
                         <dd class="col-7 small">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+
                     </dl>
+
+                    <!-- Changer statut -->
+                    <div class="border-top pt-3">
+                        <p class="small fw-semibold text-muted mb-2">Changer le statut</p>
+                        <form asp-action="UpdateStatus" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ticketId" value="@Model.Id" />
+                            <select name="statut" class="form-select form-select-sm mb-2">
+                                <option value="Ouvert">Ouvert</option>
+                                <option value="EnCours">En cours</option>
+                                <option value="Resolu">Résolu</option>
+                            </select>
+                            <button type="submit"
+                                    class="btn btn-outline-primary btn-sm w-100">
+                                Mettre à jour
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>

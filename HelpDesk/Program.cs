@@ -15,7 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration
         .GetConnectionString("DefaultConnection")));
 
-// 2. Enregistrement du repository — injection de dépendances
+// 2. Enregistrement des services metiers — injection de dépendances
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
@@ -64,5 +64,17 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
+
+// Initialiser la base de données avec les rôles et comptes de test
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider
+        .GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
+    await DbInitializer.SeedAsync(userManager, roleManager);
+}
+
+app.Run();
 
 app.Run();
