@@ -45,7 +45,6 @@ namespace HelpDesk.Controllers
 
             if (result.Succeeded)
             {
-                // Vérifier si le compte est actif
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null && !user.EstActif)
                 {

@@ -20,9 +20,13 @@ namespace HelpDesk.Controllers
         // GET: /Technician/Dashboard
         public IActionResult Dashboard()
         {
+            // Récupérer uniquement les tickets assignés au technicien connecté
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var tickets = _context.Tickets
                 .Include(t => t.Createur)
                 .Include(t => t.Technicien)
+                .Where(t => t.TechnicienId == userId) // ← filtre par technicien
                 .ToList();
 
             var vm = new TechnicianDashboardViewModel
@@ -65,8 +69,10 @@ namespace HelpDesk.Controllers
                     .ThenInclude(c => c.Auteur)
                 .FirstOrDefault(t => t.Id == id);
 
-            if (ticket == null)
-                return NotFound();
+            // Vérifier que le ticket est bien assigné à ce technicien
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (ticket.TechnicienId != userId)
+                return Forbid(); // accès refusé
 
             var comments = ticket.Comments
                 .OrderBy(c => c.DateCreation)
