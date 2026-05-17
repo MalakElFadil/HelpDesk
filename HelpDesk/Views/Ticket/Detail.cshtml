@@ -180,7 +180,7 @@
                         <dt class="col-5 text-muted small">Catégorie</dt>
                         <dd class="col-7">
                             <span class="badge bg-light text-dark border">
-                                @(Model.Category ?? "Non classé")
+                                @(Model.Category?.ToString() ?? "Non classé")
                             </span>
                         </dd>
 

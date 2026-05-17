@@ -82,7 +82,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border">
-                                        @(ticket.Category ?? "Non classé")
+                                        @(ticket.Category?.ToString() ?? "Non classé")
                                     </span>
                                 </td>
                                 <td>

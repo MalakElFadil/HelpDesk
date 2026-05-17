@@ -4,6 +4,7 @@ using HelpDesk.Data;
 using HelpDesk.Data.Repositories;
 using HelpDesk.Interfaces;
 using HelpDesk.Models;
+using HelpDesk.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .GetConnectionString("DefaultConnection")));
 
 // 2. Enregistrement du repository — injection de dépendances
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+
+// HttpClient pour l'appel API Groq
+builder.Services.AddHttpClient();
 
 // 3. ASP.NET Identity : gestion des comptes et des rôles
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
