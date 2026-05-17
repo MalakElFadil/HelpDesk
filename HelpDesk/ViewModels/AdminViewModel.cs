@@ -41,4 +41,25 @@ namespace HelpDesk.ViewModels
         public string Id { get; set; } = string.Empty;
         public string Nom { get; set; } = string.Empty;
     }
+
+    // ── Liste utilisateurs ────────────────────────────────────────────────
+    public class UserListViewModel
+    {
+        public required string Id { get; set; }
+        public required string Nom { get; set; }
+        public required string Prenom { get; set; }
+        public required string Email { get; set; }
+        public bool EstActif { get; set; }
+        public DateTime DateCreation { get; set; }
+        public string? Role { get; set; }
+    }
+
+    public class UsersPageViewModel
+    {
+        public List<UserListViewModel> Users { get; set; } = new();
+        public string? Filter { get; set; }
+    }
+
+
+
 }

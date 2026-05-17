@@ -3,75 +3,78 @@
     ViewData["Title"] = "Dashboard Admin";
 }
 
-<div class="container-fluid py-4">
+<div class="container py-4">
 
-    <!-- En-tête -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Dashboard</h2>
-            <small class="text-muted">Vue globale du système HelpDesk</small>
-        </div>
-        <a asp-controller="Admin" asp-action="Tickets"
-           class="btn btn-primary px-4">
-            Voir tous les tickets
-        </a>
+    <div class="mb-4">
+        <h2 class="fw-bold mb-0">Dashboard Administrateur</h2>
+        <small class="text-muted">Vue globale du système HelpDesk</small>
     </div>
 
-    <!-- KPIs — 4 cartes comme la maquette Fig.2 -->
+    <!-- KPIs -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small">Total tickets</div>
-                    <div class="fw-bold fs-3">@Model.TotalTickets</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small">En cours</div>
-                    <div class="fw-bold fs-3 text-warning">
-                        @Model.TicketsEnCours
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                        <i class="bi bi-ticket-detailed fs-4 text-primary"></i>
                     </div>
-                    <small class="text-muted">À traiter</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small">Taux résolution</div>
-                    <div class="fw-bold fs-3 text-success">
-                        @(Model.TotalTickets > 0
-                                                ? $"{(Model.TicketsResolus * 100 / Model.TotalTickets)}%"
-                                                : "0%")
+                    <div>
+                        <div class="fs-2 fw-bold">@Model.TotalTickets</div>
+                        <div class="text-muted small">Total tickets</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="text-muted small">Urgents</div>
-                    <div class="fw-bold fs-3 text-danger">
-                        @Model.TicketsUrgents
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                        <i class="bi bi-hourglass-split fs-4 text-warning"></i>
                     </div>
-                    <small class="text-danger">Priorité haute</small>
+                    <div>
+                        <div class="fs-2 fw-bold">@Model.TicketsEnCours</div>
+                        <div class="text-muted small">En cours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                        <i class="bi bi-check-circle fs-4 text-success"></i>
+                    </div>
+                    <div>
+                        <div class="fs-2 fw-bold">@Model.TicketsResolus</div>
+                        <div class="text-muted small">Résolus</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                        <i class="bi bi-exclamation-triangle fs-4 text-danger"></i>
+                    </div>
+                    <div>
+                        <div class="fs-2 fw-bold">@Model.TicketsUrgents</div>
+                        <div class="text-muted small">Urgents</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Tickets récents -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom py-3 d-flex
-                    justify-content-between align-items-center">
-            <h6 class="mb-0 fw-semibold">Tickets récents</h6>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold">
+                <i class="bi bi-clock-history me-2 text-primary"></i>
+                Tickets récents
+            </h6>
             <a asp-controller="Admin" asp-action="Tickets"
-               class="text-primary small text-decoration-none">
-                Voir tous →
-            </a>
+               class="btn btn-sm btn-outline-primary">Voir tous</a>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -79,65 +82,102 @@
                     <tr>
                         <th>#</th>
                         <th>Titre</th>
-                        <th>Utilisateur</th>
-                        <th>Statut</th>
+                        <th>Catégorie</th>
                         <th>Priorité</th>
+                        <th>Statut</th>
+                        <th>Créé par</th>
+                        <th>Assigné à</th>
                         <th>Date</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var ticket in Model.TicketsRecents)
+                    @foreach (var t in Model.TicketsRecents)
                     {
                         <tr>
-                            <td class="text-muted small">#@ticket.Id</td>
-                            <td class="fw-semibold">@ticket.Title</td>
-                            <td class="small">@ticket.CreatedByName</td>
+                            <td class="text-muted small">#@t.Id</td>
+                            <td class="fw-semibold">@t.Title</td>
                             <td>
-                                @switch (ticket.Status)
-                                {
-                                    case HelpDesk.Models.StatutTicket.Ouvert:
-                                        <span class="badge bg-danger">Ouvert</span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.EnCours:
-                                        <span class="badge bg-warning text-dark">
-                                            En cours
-                                        </span>
-                                        break;
-                                    case HelpDesk.Models.StatutTicket.Resolu:
-                                        <span class="badge bg-success">Résolu</span>
-                                        break;
-                                }
+                                <span class="badge bg-light text-dark border">
+                                    @t.Category.ToString()
+                                </span>
                             </td>
                             <td>
-                                @if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                                @if (t.Priority == HelpDesk.Models.PrioriteTicket.Haute)
                                 {
-                                    <span class="badge bg-danger">Haute</span>
+                                    <span class="badge bg-danger">🔴 Haute</span>
                                 }
-                                else if (ticket.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
+                                else if (t.Priority == HelpDesk.Models.PrioriteTicket.Moyenne)
                                 {
-                                    <span class="badge bg-warning text-dark">Moyenne</span>
+                                    <span class="badge bg-warning text-dark">🟠 Moyenne</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Basse</span>
+                                    <span class="badge bg-secondary">🟢 Basse</span>
                                 }
                             </td>
+                            <td>
+                                @if (t.Status == HelpDesk.Models.StatutTicket.Ouvert)
+                                {
+                                    <span class="badge bg-danger">Ouvert</span>
+                                }
+                                else if (t.Status == HelpDesk.Models.StatutTicket.EnCours)
+                                {
+                                    <span class="badge bg-warning text-dark">En cours</span>
+                                }
+                                else if (t.Status == HelpDesk.Models.StatutTicket.Resolu)
+                                {
+                                    <span class="badge bg-success">Résolu</span>
+                                }
+                            </td>
+                            <td class="small">@t.CreatedByName</td>
+                            <td class="small text-muted">
+                                @(t.AssignedToName ?? "Non assigné")
+                            </td>
                             <td class="text-muted small">
-                                @ticket.CreatedAt.ToString("dd/MM/yyyy")
+                                @t.CreatedAt.ToString("dd/MM/yyyy")
                             </td>
                             <td>
-                                <a asp-controller="Admin"
-                                   asp-action="Detail"
-                                   asp-route-id="@ticket.Id"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Voir
-                                </a>
+                                <a asp-controller="Admin" asp-action="Detail"
+                                   asp-route-id="@t.Id"
+                                   class="btn btn-sm btn-outline-primary">Voir</a>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Raccourcis -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <a asp-controller="Admin" asp-action="Tickets"
+               class="card border-0 shadow-sm text-decoration-none h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                        <i class="bi bi-list-ul fs-4 text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold text-dark">Tous les tickets</div>
+                        <div class="text-muted small">Gérer, assigner et superviser</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-controller="Admin" asp-action="Users"
+               class="card border-0 shadow-sm text-decoration-none h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-4">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                        <i class="bi bi-people fs-4 text-success"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold text-dark">Gestion utilisateurs</div>
+                        <div class="text-muted small">Comptes, rôles et accès</div>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 

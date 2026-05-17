@@ -34,6 +34,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// Injection de dépendances — Repositories et Services
+builder.Services.AddScoped<HelpDesk.Interfaces.ITicketRepository,
+                            HelpDesk.Data.Repositories.TicketRepository>();
+builder.Services.AddScoped<HelpDesk.Interfaces.ITicketService,
+                            HelpDesk.Services.TicketService>();
+
 // 4. MVC
 builder.Services.AddControllersWithViews();
 
