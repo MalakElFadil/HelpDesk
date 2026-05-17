@@ -15,7 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration
         .GetConnectionString("DefaultConnection")));
 
-// 2. Enregistrement du repository — injection de dépendances
+// 2. Enregistrement des services metiers — injection de dépendances
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
