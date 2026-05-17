@@ -34,7 +34,9 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0" style="white-space: pre-wrap;">@Model.Description</p>
+                    <p class="mb-0" style="white-space: pre-wrap;">
+                        @Model.Description
+                    </p>
                 </div>
             </div>
 
@@ -50,7 +52,9 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <p class="mb-0" style="white-space: pre-wrap;">@Model.AIAnalysis</p>
+                        <p class="mb-0" style="white-space: pre-wrap;">
+                            @Model.AIAnalysis
+                        </p>
                     </div>
                 </div>
             }
@@ -88,7 +92,7 @@
                                             @comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
                                         </small>
                                     </div>
-                                    <p class="mb-0 text-body">@comment.Content</p>
+                                    <p class="mb-0">@comment.Content</p>
                                 </li>
                             }
                         </ul>
@@ -96,9 +100,8 @@
                 </div>
             </div>
 
-            <!-- Ajouter un commentaire -->
-            @if (Model.Status.ToString() != "Résolu" &&
-                        Model.Status.ToString() != "Fermé")
+            <!-- Zone commentaire (si ticket pas résolu) -->
+            @if (Model.Status != HelpDesk.Models.StatutTicket.Resolu)
             {
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-bottom py-3">
@@ -112,9 +115,10 @@
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="ticketId" value="@Model.Id" />
                             <div class="mb-3">
-                                <textarea name="content" class="form-control" rows="4"
-                                      placeholder="Écrivez votre commentaire..."
-                                      required></textarea>
+                                <textarea name="content" class="form-control"
+                                          rows="4"
+                                          placeholder="Écrivez votre commentaire..."
+                                          required></textarea>
                             </div>
                             <div class="d-flex justify-content-end">
                                 <button type="submit" class="btn btn-primary px-4">
@@ -128,7 +132,7 @@
 
         </div>
 
-        <!-- Colonne latérale : infos ticket -->
+        <!-- Colonne latérale -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm sticky-top" style="top: 1rem;">
                 <div class="card-header bg-white border-bottom py-3">
@@ -139,40 +143,38 @@
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
+
                         <dt class="col-5 text-muted small">Statut</dt>
                         <dd class="col-7">
-                            @switch (Model.Status.ToString())
+                            @switch (Model.Status)
                             {
-                                case "Ouvert":
+                                case HelpDesk.Models.StatutTicket.Ouvert:
                                     <span class="badge bg-danger">Ouvert</span>
                                     break;
-                                case "EnCours":
+                                case HelpDesk.Models.StatutTicket.EnCours:
                                     <span class="badge bg-warning text-dark">En cours</span>
                                     break;
-                                case "Résolu":
+                                case HelpDesk.Models.StatutTicket.Resolu:
                                     <span class="badge bg-success">Résolu</span>
                                     break;
                                 default:
-                                    <span class="badge bg-secondary">Fermé</span>
+                                    <span class="badge bg-secondary">@Model.Status</span>
                                     break;
                             }
                         </dd>
 
                         <dt class="col-5 text-muted small">Priorité</dt>
                         <dd class="col-7">
-                            @switch (Model.Priority.ToString())
+                            @switch (Model.Priority)
                             {
-                                case "Urgente":
-                                    <span class="badge bg-danger">🔴 Urgente</span>
+                                case HelpDesk.Models.PrioriteTicket.Haute:
+                                    <span class="badge bg-danger">🔴 Haute</span>
                                     break;
-                                case "Haute":
-                                    <span class="badge bg-warning text-dark">🟠 Haute</span>
-                                    break;
-                                case "Normale":
-                                    <span class="badge bg-primary">🔵 Normale</span>
+                                case HelpDesk.Models.PrioriteTicket.Moyenne:
+                                    <span class="badge bg-warning text-dark">🟠 Moyenne</span>
                                     break;
                                 default:
-                                    <span class="badge bg-secondary">🟢 Faible</span>
+                                    <span class="badge bg-secondary">🟢 Basse</span>
                                     break;
                             }
                         </dd>
@@ -180,7 +182,9 @@
                         <dt class="col-5 text-muted small">Catégorie</dt>
                         <dd class="col-7">
                             <span class="badge bg-light text-dark border">
-                                @(Model.Category ?? "Non classé")
+                                @(Model.Category.HasValue
+                                    ? Model.Category.Value.ToString()
+                                    : "Non classé")
                             </span>
                         </dd>
 
@@ -196,6 +200,7 @@
                         <dd class="col-7 small">
                             @Model.CreatedAt.ToString("dd/MM/yyyy")
                         </dd>
+
                     </dl>
                 </div>
             </div>
