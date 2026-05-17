@@ -1,0 +1,142 @@
+﻿@model IEnumerable<HelpDesk.ViewModels.TicketListViewModel>
+@{
+    ViewData["Title"] = "Mes tickets";
+}
+
+<div class="container py-4">
+
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Mes tickets</h2>
+            <small class="text-muted">Suivi de toutes vos demandes de support</small>
+        </div>
+        <a asp-controller="Ticket" asp-action="Create"
+           class="btn btn-primary px-4">
+            <i class="bi bi-plus-lg me-2"></i>Nouveau ticket
+        </a>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-action="Index" class="btn btn-sm btn-primary">
+                    Tous
+                </a>
+                <a asp-action="Index" asp-route-status="Ouvert"
+                   class="btn btn-sm btn-outline-danger">
+                    🔴 Ouverts
+                </a>
+                <a asp-action="Index" asp-route-status="EnCours"
+                   class="btn btn-sm btn-outline-warning">
+                    🟠 En cours
+                </a>
+                <a asp-action="Index" asp-route-status="Résolu"
+                   class="btn btn-sm btn-outline-success">
+                    🟢 Résolus
+                </a>
+                <a asp-action="Index" asp-route-status="Fermé"
+                   class="btn btn-sm btn-outline-secondary">
+                    ⚫ Fermés
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des tickets -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted mt-3">Aucun ticket trouvé.</p>
+            <a asp-action="Create" class="btn btn-primary mt-2">
+                Créer votre premier ticket
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Titre</th>
+                            <th>Catégorie</th>
+                            <th>Priorité</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Assigné à</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ticket in Model)
+                        {
+                            <tr>
+                                <td class="text-muted small">#@ticket.Id</td>
+                                <td>
+                                    <span class="fw-semibold">@ticket.Title</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @(ticket.Category ?? "Non classé")
+                                    </span>
+                                </td>
+                                <td>
+                                    @switch (ticket.Priority.ToString())
+                                    {
+                                        case "Urgente":
+                                            <span class="badge bg-danger">🔴 Urgente</span>
+                                            break;
+                                        case "Haute":
+                                            <span class="badge bg-warning text-dark">🟠 Haute</span>
+                                            break;
+                                        case "Normale":
+                                            <span class="badge bg-primary">🔵 Normale</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">🟢 Faible</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @switch (ticket.Status.ToString())
+                                    {
+                                        case "Ouvert":
+                                            <span class="badge bg-danger">Ouvert</span>
+                                            break;
+                                        case "EnCours":
+                                            <span class="badge bg-warning text-dark">En cours</span>
+                                            break;
+                                        case "Résolu":
+                                            <span class="badge bg-success">Résolu</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Fermé</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-muted small">
+                                    @ticket.CreatedAt.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="text-muted small">
+                                    @(ticket.AssignedToName ?? "Non assigné")
+                                </td>
+                                <td>
+                                    <a asp-action="Detail"
+                                       asp-route-id="@ticket.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Voir
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
