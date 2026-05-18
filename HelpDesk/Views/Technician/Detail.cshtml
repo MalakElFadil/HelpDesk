@@ -11,12 +11,8 @@
         <a asp-controller="Technician" asp-action="Dashboard" class="sidebar-link">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
-        <a asp-controller="Technician" asp-action="Assigned"
-           class="sidebar-link active">
-            <i class="bi bi-ticket-detailed"></i> Tickets assignés
-        </a>
-        <a asp-controller="Technician" asp-action="Resolved" class="sidebar-link">
-            <i class="bi bi-check-circle"></i> Résolus
+        <a asp-controller="Technician" asp-action="Dashboard" class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Mes tickets
         </a>
         <div class="sidebar-footer">
             <div class="user-info">
@@ -214,9 +210,25 @@
     .sidebar-link:hover, .sidebar-link.active { background:rgba(255,255,255,0.12); color:white; }
     .sidebar-footer { margin-top:auto; padding:16px 20px; border-top:1px solid rgba(255,255,255,0.1); }
     .user-info { display:flex; align-items:center; gap:10px; }
-    .user-avatar { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:600; }
-    .user-name { font-size:0.82rem; color:white; }
-    .user-email { font-size:0.72rem; color:rgba(255,255,255,0.55); }
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
     .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
     .top-bar { background:white; border-bottom:1px solid #e5e7eb; padding:12px 24px; }
     .content-area { padding:24px; overflow-y:auto; flex:1; }

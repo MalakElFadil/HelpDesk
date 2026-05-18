@@ -42,10 +42,6 @@
                     <i class="bi bi-search"></i>
                     <input type="text" placeholder="Rechercher un ticket..." />
                 </div>
-                <a asp-controller="Ticket" asp-action="Create"
-                   class="btn-create">
-                    + Créer un ticket
-                </a>
             </div>
         </div>
 
@@ -308,6 +304,16 @@
         gap: 10px;
     }
 
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
     .user-avatar {
         width: 32px;
         height: 32px;
@@ -332,16 +338,6 @@
         font-size: 0.65rem;
         font-weight: 600;
         flex-shrink: 0;
-    }
-
-    .user-name {
-        font-size: 0.82rem;
-        color: white;
-    }
-
-    .user-email {
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.55);
     }
 
     .main-area {

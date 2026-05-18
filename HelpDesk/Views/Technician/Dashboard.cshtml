@@ -12,14 +12,8 @@
            class="sidebar-link active">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
-        <a asp-controller="Technician" asp-action="Assigned"
-           class="sidebar-link">
-            <i class="bi bi-ticket-detailed"></i> Tickets assignés
-            <span class="badge bg-danger ms-auto">@Model.TotalAssigned</span>
-        </a>
-        <a asp-controller="Technician" asp-action="Resolved"
-           class="sidebar-link">
-            <i class="bi bi-check-circle"></i> Résolus
+        <a asp-controller="Technician" asp-action="Dashboard" class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Mes tickets
         </a>
         <div class="sidebar-footer">
             <div class="user-info">
@@ -177,6 +171,16 @@
         gap: 10px;
     }
 
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
     .user-avatar {
         width: 32px;
         height: 32px;
@@ -187,16 +191,6 @@
         justify-content: center;
         font-size: 0.75rem;
         font-weight: 600;
-    }
-
-    .user-name {
-        font-size: 0.82rem;
-        color: white;
-    }
-
-    .user-email {
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.55);
     }
 
     .main-area {
