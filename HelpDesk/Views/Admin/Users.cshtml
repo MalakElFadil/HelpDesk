@@ -1,206 +1,413 @@
-﻿@model HelpDesk.ViewModels.UsersPageViewModel
+@model HelpDesk.ViewModels.UsersPageViewModel
 @{
     ViewData["Title"] = "Gestion des utilisateurs";
+    var currentRole = Context.Request.Query["role"].ToString();
 }
 
-<div class="container py-4">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-    <!-- Mini-stats -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="text-muted small">Total comptes</div>
-                <div class="fs-3 fw-bold">@Model.Users.Count</div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="text-muted small">Comptes actifs</div>
-                <div class="fs-3 fw-bold text-success">
-                    @Model.Users.Count(u => u.EstActif)
+    <!-- ── Sidebar identique aux autres pages Admin ── -->
+    <div class="sidebar">
+        <div class="sidebar-section">PRINCIPAL</div>
+        <a asp-controller="Admin" asp-action="Dashboard" class="sidebar-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a asp-controller="Admin" asp-action="Tickets" class="sidebar-link">
+            <i class="bi bi-ticket-detailed"></i> Tous les tickets
+        </a>
+        <div class="sidebar-section">GESTION</div>
+        <a asp-controller="Admin" asp-action="Users" class="sidebar-link active">
+            <i class="bi bi-people"></i> Utilisateurs
+        </a>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+                <div>
+                    <div class="user-name">Admin</div>
+                    <div class="user-email">admin@@helpdesk.ma</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3">
-                <div class="text-muted small">Techniciens</div>
-                <div class="fs-3 fw-bold text-info">
-                    @Model.Users.Count(u => u.Role == "Technicien")
+    </div>
+
+    <!-- ── Zone principale ── -->
+    <div class="main-area">
+
+        <!-- Barre du haut avec titre + recherche + bouton Ajouter -->
+        <div class="top-bar">
+            <span class="page-title">Gestion des utilisateurs</span>
+            <div class="d-flex gap-2 align-items-center">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Rechercher un utilisateur..."
+                           id="searchInput" onkeyup="filterTable()" />
                 </div>
+                <button class="btn-create" data-bs-toggle="modal"
+                        data-bs-target="#modalAjout">
+                    + Ajouter
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Filtres par rôle -->
-    @{
-        var currentRole = Context.Request.Query["role"].ToString();
-    }
-    <div class="d-flex gap-2 flex-wrap">
-        <a asp-action="Users"
-           class="btn btn-sm @(string.IsNullOrEmpty(currentRole) ? "btn-primary" : "btn-outline-secondary")">
-            Tous
-        </a>
-        <a asp-action="Users" asp-route-role="Utilisateur"
-           class="btn btn-sm @(currentRole == "Utilisateur" ? "btn-secondary text-white" : "btn-outline-secondary")">
-            👤 Utilisateurs
-        </a>
-        <a asp-action="Users" asp-route-role="Technicien"
-           class="btn btn-sm @(currentRole == "Technicien" ? "btn-info text-dark" : "btn-outline-info")">
-            🔧 Techniciens
-        </a>
-        <a asp-action="Users" asp-route-role="Administrateur"
-           class="btn btn-sm @(currentRole == "Administrateur" ? "btn-danger text-white" : "btn-outline-danger")">
-            👑 Admins
-        </a>
-    </div>
+        <div class="content-area">
 
-    <!-- Tableau utilisateurs -->
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nom complet</th>
-                        <th>Email</th>
-                        <th>Rôle</th>
-                        <th>Statut</th>
-                        <th>Date création</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model.Users)
-                    {
-                        <tr>
-                            <td class="fw-semibold">
-                                @user.Prenom @user.Nom
-                            </td>
-                            <td class="text-muted small">@user.Email</td>
-                            <td>
-                                @if (user.Role == "Administrateur")
-                                {
-                                    <span class="badge bg-danger">👑 Admin</span>
-                                }
-                                else if (user.Role == "Technicien")
-                                {
-                                    <span class="badge bg-info text-dark">🔧 Technicien</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">👤 Utilisateur</span>
-                                }
-                            </td>
-                            <td>
-                                @if (user.EstActif)
-                                {
-                                    <span class="badge bg-success">Actif</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">Inactif</span>
-                                }
-                            </td>
-                            <td class="text-muted small">
-                                @user.DateCreation.ToString("dd/MM/yyyy")
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <a asp-controller="Admin"
-                                       asp-action="EditUser"
-                                       asp-route-id="@user.Id"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form asp-controller="Admin"
-                                          asp-action="ToggleUser"
-                                          method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id"
-                                               value="@user.Id" />
-                                        <button type="submit"
-                                                class="btn btn-sm @(user.EstActif ? "btn-outline-warning" : "btn-outline-success")"
-                                                title="@(user.EstActif ? "Désactiver" : "Activer")">
-                                            <i class="bi @(user.EstActif ? "bi-person-slash" : "bi-person-check")"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <!-- Mini-stats -->
+            <div class="kpi-grid mb-4">
+                <div class="kpi-card">
+                    <div class="kpi-label">Total comptes</div>
+                    <div class="kpi-value">@Model.Users.Count</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Comptes actifs</div>
+                    <div class="kpi-value text-success">
+                        @Model.Users.Count(u => u.EstActif)
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Techniciens</div>
+                    <div class="kpi-value" style="color:#0ea5e9;">
+                        @Model.Users.Count(u => u.Role == "Technicien")
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres par rôle -->
+            <div class="d-flex gap-2 mb-3">
+                <a asp-action="Users"
+                   class="filter-btn @(string.IsNullOrEmpty(currentRole) ? "active" : "")">
+                    Tous
+                    <span class="badge bg-secondary ms-1">@Model.Users.Count</span>
+                </a>
+                <a asp-action="Users" asp-route-role="Utilisateur"
+                   class="filter-btn @(currentRole == "Utilisateur" ? "active" : "")">
+                    Utilisateurs
+                    <span class="badge bg-secondary ms-1">
+                        @Model.Users.Count(u => u.Role == "Utilisateur")
+                    </span>
+                </a>
+                <a asp-action="Users" asp-route-role="Technicien"
+                   class="filter-btn @(currentRole == "Technicien" ? "active" : "")">
+                    Techniciens
+                    <span class="badge bg-secondary ms-1">
+                        @Model.Users.Count(u => u.Role == "Technicien")
+                    </span>
+                </a>
+                <a asp-action="Users" asp-route-role="Administrateur"
+                   class="filter-btn @(currentRole == "Administrateur" ? "active" : "")">
+                    Admins
+                    <span class="badge bg-secondary ms-1">
+                        @Model.Users.Count(u => u.Role == "Administrateur")
+                    </span>
+                </a>
+            </div>
+
+            <!-- Tableau des utilisateurs -->
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="userTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="small">Nom</th>
+                                <th class="small">Email</th>
+                                <th class="small">Rôle</th>
+                                <th class="small">Statut</th>
+                                <th class="small">Créé le</th>
+                                <th class="small">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <!-- Avatar + Nom -->
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="user-avatar-sm">
+                                                @user.Prenom.Substring(0,1).ToUpper()@user.Nom.Substring(0,1).ToUpper()
+                                            </div>
+                                            <span class="fw-semibold small">
+                                                @user.Prenom @user.Nom
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted small">@user.Email</td>
+                                    <td>
+                                        @if (user.Role == "Administrateur")
+                                        {
+                                            <span class="badge-role role-admin">Admin</span>
+                                        }
+                                        else if (user.Role == "Technicien")
+                                        {
+                                            <span class="badge-role role-tech">Technicien</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-role role-user">Utilisateur</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (user.EstActif)
+                                        {
+                                            <span class="badge-status status-resolu">Actif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-status status-ouvert">Inactif</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted small">
+                                        @user.DateCreation.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <!-- Modifier -->
+                                            <a asp-controller="Admin"
+                                               asp-action="EditUser"
+                                               asp-route-id="@user.Id"
+                                               class="btn-action">
+                                                <i class="bi bi-pencil"></i> Modifier
+                                            </a>
+                                            <!-- Activer / Désactiver -->
+                                            <form asp-controller="Admin"
+                                                  asp-action="ToggleUser"
+                                                  method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id"
+                                                       value="@user.Id" />
+                                                <button type="submit"
+                                                        class="btn-action @(user.EstActif ? "btn-deactivate" : "btn-activate")">
+                                                    @(user.EstActif ? "Désactiver" : "Réactiver")
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
-
 </div>
 
-<!-- Modal Ajout compte -->
+<!-- ── Modal Ajout ── -->
 <div class="modal fade" id="modalAjout" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-person-plus me-2 text-primary"></i>
-                    Ajouter un compte
-                </h5>
-                <button type="button" class="btn-close"
-                        data-bs-dismiss="modal"></button>
+                <h5 class="modal-title fw-bold">Ajouter un compte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form asp-controller="Admin" asp-action="CreateUser" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Prénom <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="prenom"
-                                   class="form-control" required />
+                            <label class="form-label small fw-medium">Prénom *</label>
+                            <input type="text" name="prenom" class="form-control" required />
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Nom <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="nom"
-                                   class="form-control" required />
+                            <label class="form-label small fw-medium">Nom *</label>
+                            <input type="text" name="nom" class="form-control" required />
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold">
-                                Email <span class="text-danger">*</span>
-                            </label>
-                            <input type="email" name="email"
-                                   class="form-control" required />
+                            <label class="form-label small fw-medium">Email *</label>
+                            <input type="email" name="email" class="form-control" required />
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Rôle <span class="text-danger">*</span>
-                            </label>
+                            <label class="form-label small fw-medium">Rôle *</label>
                             <select name="role" class="form-select" required>
-                                <option value="Utilisateur">👤 Utilisateur</option>
-                                <option value="Technicien">🔧 Technicien</option>
-                                <option value="Administrateur">👑 Administrateur</option>
+                                <option value="Utilisateur">Utilisateur</option>
+                                <option value="Technicien">Technicien</option>
+                                <option value="Administrateur">Administrateur</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Mot de passe <span class="text-danger">*</span>
-                            </label>
-                            <input type="password" name="password"
-                                   class="form-control" required
-                                   placeholder="Min. 6 caractères" />
+                            <label class="form-label small fw-medium">Mot de passe *</label>
+                            <input type="password" name="password" class="form-control"
+                                   required placeholder="Min. 6 caractères" />
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary"
-                            data-bs-dismiss="modal">
-                        Annuler
-                    </button>
+                            data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-person-plus me-2"></i>Créer le compte
+                        Créer le compte
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    /* ── Layout ── */
+    .sidebar {
+        width: 220px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+        transition: background 0.15s;
+    }
+
+    .sidebar-link:hover, .sidebar-link.active {
+        background: rgba(255,255,255,0.12);
+        color: white;
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info { display: flex; align-items: center; gap: 10px; }
+
+    .user-avatar {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 600;
+    }
+
+    .user-avatar-sm {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: #1F4E79; color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem; font-weight: 600; flex-shrink: 0;
+    }
+
+    .user-name { font-size: 0.82rem; color: white; }
+    .user-email { font-size: 0.72rem; color: rgba(255,255,255,0.55); }
+
+    .main-area { flex: 1; display: flex; flex-direction: column; }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .page-title { font-size: 1rem; font-weight: 600; color: #1a1a2e; }
+
+    .search-box {
+        display: flex; align-items: center; gap: 8px;
+        background: #f4f6fa; border: 1px solid #e5e7eb;
+        border-radius: 8px; padding: 6px 12px;
+    }
+
+    .search-box input {
+        border: none; background: none; outline: none;
+        font-size: 0.85rem; width: 200px;
+    }
+
+    .btn-create {
+        background: #1F4E79; color: white; border: none;
+        padding: 7px 16px; border-radius: 8px;
+        font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+    }
+
+    .btn-create:hover { background: #163a5e; }
+
+    .content-area { padding: 24px; overflow-y: auto; flex: 1; }
+
+    /* KPIs — 3 colonnes pour cette page */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .kpi-card {
+        background: white; border-radius: 10px;
+        padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .kpi-label { font-size: 0.78rem; color: #6b7280; margin-bottom: 4px; }
+    .kpi-value { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+
+    /* Filtres */
+    .filter-btn {
+        background: white; border: 1px solid #e5e7eb;
+        border-radius: 8px; padding: 6px 14px;
+        font-size: 0.82rem; cursor: pointer;
+        text-decoration: none; color: #374151;
+    }
+
+    .filter-btn.active {
+        background: #1F4E79; color: white; border-color: #1F4E79;
+    }
+
+    /* Badges rôles */
+    .badge-role {
+        padding: 3px 10px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 500;
+    }
+
+    .role-admin { background: #FEE2E2; color: #991B1B; }
+    .role-tech  { background: #E0F2FE; color: #0369A1; }
+    .role-user  { background: #F3F4F6; color: #374151; }
+
+    /* Badges statut — réutilisés depuis les autres pages */
+    .badge-status {
+        padding: 3px 10px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 500;
+    }
+
+    .status-resolu { background: #D1FAE5; color: #065F46; }
+    .status-ouvert { background: #FEE2E2; color: #991B1B; }
+
+    /* Boutons d'action dans le tableau */
+    .btn-action {
+        border: 1px solid #d1d5db; background: white; color: #374151;
+        border-radius: 6px; padding: 4px 10px;
+        font-size: 0.78rem; cursor: pointer;
+        text-decoration: none; white-space: nowrap;
+    }
+
+    .btn-action:hover { background: #f9fafb; }
+
+    .btn-deactivate { color: #dc2626; border-color: #fca5a5; }
+    .btn-activate   { color: #16a34a; border-color: #86efac; }
+</style>
+
+@section Scripts {
+    <script>
+        // Recherche côté client dans le tableau
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#userTable tbody tr').forEach(row => {
+                row.style.display =
+                    row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

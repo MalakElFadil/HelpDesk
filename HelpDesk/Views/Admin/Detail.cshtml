@@ -3,242 +3,351 @@
     ViewData["Title"] = "Ticket #" + Model.Id;
 }
 
-<div class="container py-4">
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Admin" asp-action="Tickets">Tous les tickets</a>
-            </li>
-            <li class="breadcrumb-item active">Ticket #@Model.Id</li>
-        </ol>
-    </nav>
-
-    <!-- En-tête ticket -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-section">PRINCIPAL</div>
+        <a asp-controller="Admin" asp-action="Dashboard" class="sidebar-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a asp-controller="Admin" asp-action="Tickets" class="sidebar-link active">
+            <i class="bi bi-ticket-detailed"></i> Tous les tickets
+        </a>
+        <div class="sidebar-section">GESTION</div>
+        <a asp-controller="Admin" asp-action="Users" class="sidebar-link">
+            <i class="bi bi-people"></i> Utilisateurs
+        </a>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
                 <div>
-                    <span class="text-muted small">#@Model.Id</span>
-                    <h3 class="fw-bold mb-2">@Model.Title</h3>
-                    <div class="d-flex gap-2 flex-wrap">
-                        @switch (Model.Status)
-                        {
-                            case HelpDesk.Models.StatutTicket.Ouvert:
-                                <span class="badge bg-danger">Ouvert</span>
-                                break;
-                            case HelpDesk.Models.StatutTicket.EnCours:
-                                <span class="badge bg-warning text-dark">En cours</span>
-                                break;
-                            case HelpDesk.Models.StatutTicket.Resolu:
-                                <span class="badge bg-success">Résolu</span>
-                                break;
-                        }
-                        @if (Model.Priority == HelpDesk.Models.PrioriteTicket.Haute)
-                        {
-                            <span class="badge bg-danger">Haute priorité</span>
-                        }
-                        <span class="badge bg-light text-dark border">
-                            @(Model.Category.HasValue? Model.Category.Value.ToString() : "Non classé")
-                            @* par *@
-                            @Model.Category.ToString()
-                        </span>
-                        <span class="text-muted small">
-                            👤 @Model.CreatedByName —
-                            📅 @Model.CreatedAt.ToString("dd MMM yyyy")
-                        </span>
-                    </div>
+                    <div class="user-name">Admin</div>
+                    <div class="user-email">admin@@helpdesk.ma</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-
-        <!-- Colonne principale -->
-        <div class="col-lg-8">
-
-            <!-- Contrôles Admin : Statut + Assignation -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-semibold">⚙️ Contrôles Administrateur</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-
-                        <!-- Changer le statut -->
-                        <div class="col-md-6">
-                            <form asp-controller="Admin"
-                                  asp-action="UpdateStatut" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="ticketId"
-                                       value="@Model.Id" />
-                                <label class="form-label small fw-medium">
-                                    Changer le statut
-                                </label>
-                                <div class="input-group">
-                                    <select name="statut" class="form-select">
-                                        <option value="Ouvert"
-                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.Ouvert)">
-                                            Ouvert
-                                        </option>
-                                        <option value="EnCours"
-                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.EnCours)">
-                                            En cours
-                                        </option>
-                                        <option value="Resolu"
-                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.Resolu)">
-                                            Résolu
-                                        </option>
-                                    </select>
-                                    <button type="submit"
-                                            class="btn btn-primary">
-                                        Sauvegarder
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Assigner un technicien -->
-                        <div class="col-md-6">
-                            <form asp-controller="Admin"
-                                  asp-action="AssignerTechnicien" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="ticketId"
-                                       value="@Model.Id" />
-                                <label class="form-label small fw-medium">
-                                    Assigner à
-                                </label>
-                                <div class="input-group">
-                                    <select name="technicienId" class="form-select">
-                                        <option value="">-- Choisir --</option>
-                                        @foreach (var tech in Model.Techniciens)
-                                        {
-                                            <option value="@tech.Id"
-                                                    selected="@(tech.Id == Model.AssignedToId)">
-                                                @tech.Nom
-                                            </option>
-                                        }
-                                    </select>
-                                    <button type="submit"
-                                            class="btn btn-success">
-                                        Assigner
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-
-                    <!-- Bouton supprimer -->
-                    <div class="mt-3 pt-3 border-top">
-                        <form asp-controller="Admin"
-                              asp-action="DeleteTicket" method="post"
-                              onsubmit="return confirm('Supprimer ce ticket ?')">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="ticketId"
-                                   value="@Model.Id" />
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-sm">
-                                🗑️ Supprimer ce ticket
-                            </button>
-                        </form>
-                    </div>
-                </div>
+    <!-- Contenu -->
+    <div class="main-area">
+        <div class="top-bar">
+            <div class="d-flex align-items-center gap-2">
+                <a asp-controller="Admin" asp-action="Tickets"
+                   class="text-muted small text-decoration-none">← Tous les tickets</a>
+                <span class="text-muted small">/ Ticket #@Model.Id</span>
             </div>
+        </div>
 
-            <!-- Bloc IA -->
-            @if (!string.IsNullOrEmpty(Model.AIAnalysis))
-            {
-                <div class="card border-0 shadow-sm mb-4"
-                     style="border-left: 4px solid #0d6efd !important;">
-                    <div class="card-header bg-primary bg-opacity-10 py-3">
-                        <h6 class="mb-0 fw-semibold text-primary">
-                            🤖 Analyse IA automatique
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="mb-0">@Model.AIAnalysis</p>
-                    </div>
-                </div>
-            }
+        <div class="content-area">
 
-            <!-- Description -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-semibold">Description</h6>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0" style="white-space: pre-wrap;">@Model.Description</p>
-                </div>
-            </div>
-
-            <!-- Fil de discussion (lecture seule pour l'admin) -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-semibold">
-                        Fil de discussion
-                        <span class="badge bg-secondary ms-2">
-                            @Model.Comments.Count
-                        </span>
-                    </h6>
-                </div>
-                <div class="card-body p-0">
-                    @if (!Model.Comments.Any())
+            <!-- En-tête ticket -->
+            <div class="ticket-header mb-4">
+                <span class="text-muted small">#@Model.Id</span>
+                <h3 class="fw-bold mb-2">@Model.Title</h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    @switch (Model.Status)
                     {
-                        <div class="text-center py-4 text-muted">
-                            <p class="mb-0">Aucun commentaire.</p>
+                        case HelpDesk.Models.StatutTicket.Ouvert:
+                            <span class="badge-status status-ouvert">Ouvert</span>
+                            break;
+                        case HelpDesk.Models.StatutTicket.EnCours:
+                            <span class="badge-status status-encours">En cours</span>
+                            break;
+                        case HelpDesk.Models.StatutTicket.Resolu:
+                            <span class="badge-status status-resolu">Résolu</span>
+                            break;
+                    }
+                    @if (Model.Priority == HelpDesk.Models.PrioriteTicket.Haute)
+                    {
+                        <span class="badge-priority priority-haute">Haute priorité</span>
+                    }
+                    <span class="text-muted small">
+                        👤 @Model.CreatedByName — 📅 @Model.CreatedAt.ToString("dd MMM yyyy")
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+
+                    <!-- Contrôles Admin -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h6 class="mb-0 fw-semibold">⚙️ Contrôles Administrateur</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <form asp-controller="Admin" asp-action="UpdateStatut" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ticketId" value="@Model.Id" />
+                                        <label class="form-label small fw-medium">Changer le statut</label>
+                                        <div class="input-group">
+                                            <select name="statut" class="form-select">
+                                                <option value="Ouvert" selected="@(Model.Status == HelpDesk.Models.StatutTicket.Ouvert)">Ouvert</option>
+                                                <option value="EnCours" selected="@(Model.Status == HelpDesk.Models.StatutTicket.EnCours)">En cours</option>
+                                                <option value="Resolu" selected="@(Model.Status == HelpDesk.Models.StatutTicket.Resolu)">Résolu</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <form asp-controller="Admin" asp-action="AssignerTechnicien" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ticketId" value="@Model.Id" />
+                                        <label class="form-label small fw-medium">Assigner à</label>
+                                        <div class="input-group">
+                                            <select name="technicienId" class="form-select">
+                                                <option value="">-- Choisir --</option>
+                                                @foreach (var tech in Model.Techniciens)
+                                                {
+                                                    <option value="@tech.Id" selected="@(tech.Id == Model.AssignedToId)">@tech.Nom</option>
+                                                }
+                                            </select>
+                                            <button type="submit" class="btn btn-success">Assigner</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-top">
+                                <form asp-controller="Admin" asp-action="DeleteTicket" method="post"
+                                      onsubmit="return confirm('Supprimer ce ticket ?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="ticketId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloc IA -->
+                    @if (!string.IsNullOrEmpty(Model.AIAnalysis))
+                    {
+                        <div class="ia-block mb-4">
+                            <div class="ia-header">
+                                <span>✦ Analyse IA automatique</span>
+                                <span class="small text-muted">Groq / Llama</span>
+                            </div>
+                            <div class="ia-body">
+                                <p class="mb-0 small">@Model.AIAnalysis</p>
+                            </div>
                         </div>
                     }
-                    else
-                    {
-                        <ul class="list-group list-group-flush">
-                            @foreach (var comment in Model.Comments)
+
+                    <!-- Description -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h6 class="mb-0 fw-semibold">Description</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0" style="white-space:pre-wrap;">@Model.Description</p>
+                        </div>
+                    </div>
+
+                    <!-- Commentaires -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h6 class="mb-0 fw-semibold">
+                                Fil de discussion
+                                <span class="badge bg-secondary ms-2">@Model.Comments.Count</span>
+                            </h6>
+                        </div>
+                        <div class="card-body p-0">
+                            @if (!Model.Comments.Any())
                             {
-                                <li class="list-group-item px-4 py-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-semibold small">
-                                            @comment.AuthorName
-                                        </span>
-                                        <small class="text-muted">
-                                            @comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                                        </small>
-                                    </div>
-                                    <p class="mb-0 small">@comment.Content</p>
-                                </li>
+                                <div class="text-center py-4 text-muted">
+                                    <p class="mb-0">Aucun commentaire.</p>
+                                </div>
                             }
-                        </ul>
-                    }
+                            else
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var c in Model.Comments)
+                                    {
+                                        <li class="list-group-item px-4 py-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="fw-semibold small">@c.AuthorName</span>
+                                                <small class="text-muted">@c.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </div>
+                                            <p class="mb-0 small">@c.Content</p>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar infos -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h6 class="mb-0 fw-semibold">Informations</h6>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-5 text-muted small">Créé par</dt>
+                                <dd class="col-7 small">@Model.CreatedByName</dd>
+                                <dt class="col-5 text-muted small">Assigné à</dt>
+                                <dd class="col-7 small">@(Model.AssignedToName ?? "Non assigné")</dd>
+                                <dt class="col-5 text-muted small">Date</dt>
+                                <dd class="col-7 small">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+                            </dl>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- Colonne latérale -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-semibold">Informations</h6>
-                </div>
-                <div class="card-body">
-                    <dl class="row mb-0">
-                        <dt class="col-5 text-muted small">Créé par</dt>
-                        <dd class="col-7 small">@Model.CreatedByName</dd>
-
-                        <dt class="col-5 text-muted small">Assigné à</dt>
-                        <dd class="col-7 small">
-                            @(Model.AssignedToName ?? "Non assigné")
-                        </dd>
-
-                        <dt class="col-5 text-muted small">Date</dt>
-                        <dd class="col-7 small">
-                            @Model.CreatedAt.ToString("dd/MM/yyyy")
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
+
+<style>
+    .sidebar {
+        width: 220px;
+        min-height: calc(100vh - 60px);
+        background: #1F4E79;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 16px 0;
+        flex-shrink: 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .sidebar-section {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 1px;
+        padding: 16px 20px 6px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 20px;
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        font-size: 0.88rem;
+    }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .user-name {
+        font-size: 0.82rem;
+        color: white;
+    }
+
+    .user-email {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.55);
+    }
+
+    .main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-bar {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 24px;
+    }
+
+    .content-area {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .ticket-header {
+        background: white;
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .badge-status {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-encours {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .status-ouvert {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .status-resolu {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .badge-priority {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .ia-block {
+        border-radius: 10px;
+        border: 1px solid #BFDBFE;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .ia-header {
+        background: #EFF6FF;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1D4ED8;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .ia-body {
+        background: white;
+        padding: 14px 16px;
+    }
+</style>
