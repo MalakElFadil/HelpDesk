@@ -112,13 +112,13 @@
             }
             else
             {
-                @{
-                    var actifs = Model.Where(t =>
-                        t.Status != HelpDesk.Models.StatutTicket.Resolu).ToList();
+                
+                var actifs = Model.Where(t =>
+                    t.Status != HelpDesk.Models.StatutTicket.Resolu).ToList();
 
-                    var resolus = Model.Where(t =>
-                        t.Status == HelpDesk.Models.StatutTicket.Resolu).ToList();
-                }
+                var resolus = Model.Where(t =>
+                    t.Status == HelpDesk.Models.StatutTicket.Resolu).ToList();
+                
 
                 @if (actifs.Any())
                 {

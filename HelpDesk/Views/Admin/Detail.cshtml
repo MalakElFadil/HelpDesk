@@ -80,18 +80,15 @@
                                 <div class="input-group">
                                     <select name="statut" class="form-select">
                                         <option value="Ouvert"
-                                                selected="@(Model.Status ==
-                                                                                                HelpDesk.Models.StatutTicket.Ouvert)">
+                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.Ouvert)">
                                             Ouvert
                                         </option>
                                         <option value="EnCours"
-                                                selected="@(Model.Status ==
-                                                                                                HelpDesk.Models.StatutTicket.EnCours)">
+                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.EnCours)">
                                             En cours
                                         </option>
                                         <option value="Resolu"
-                                                selected="@(Model.Status ==
-                                                                                                HelpDesk.Models.StatutTicket.Resolu)">
+                                                selected="@(Model.Status == HelpDesk.Models.StatutTicket.Resolu)">
                                             Résolu
                                         </option>
                                     </select>
@@ -173,9 +170,7 @@
                     <h6 class="mb-0 fw-semibold">Description</h6>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0" style="white-space: pre-wrap;">
-                        @Model.Description
-                    </p>
+                    <p class="mb-0" style="white-space: pre-wrap;">@Model.Description</p>
                 </div>
             </div>
 
